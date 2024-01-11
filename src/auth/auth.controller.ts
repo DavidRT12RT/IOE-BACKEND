@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, BadRequestException, Logger, InternalServerErrorException, UseGuards, Req, Headers, SetMetadata } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, BadRequestException, Logger, InternalServerErrorException, UseGuards, Req, Headers, SetMetadata, Query, ParseUUIDPipe } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -7,6 +7,8 @@ import { User } from './entities/user.entity';
 import { CreateRoleDTO } from './dto/create-role.dto';
 import { Auth } from './decorators';
 import { ValidRoles } from './interfaces';
+import { PaginationDto } from 'src/common/dtos/pagination.dto';
+import { CreateDepartmentDto } from './dto/create-department';
 
 @Controller('auth')
 export class AuthController {
@@ -19,13 +21,47 @@ export class AuthController {
     }
 
     @Post("register/role")
-    createRole(@Body() createRoleDTO:CreateRoleDTO) {
-        return this.authService.createRole(createRoleDTO);
+    @Auth()
+    createRole(
+        @Body() createRoleDTO:CreateRoleDTO,
+        @GetUser() user:User
+    ) {
+        return this.authService.createRole(createRoleDTO,user);
+    }
+
+    @Post("register/department")
+    @Auth()
+    createDepartment(
+        @Body() createDepartmentDto:CreateDepartmentDto,
+        @GetUser() user:User
+    ){
+        return this.authService.createDepartment(createDepartmentDto,user);
     }
 
     @Post("login")
     loginUser(@Body() loginUserDto:LoginUserDto){
         return this.authService.loginUser(loginUserDto);
+    }
+
+    @Get("/users")
+    getAllUsers(
+        @Query() paginationDto:PaginationDto
+    ){
+        return this.authService.findAllUsers(paginationDto);
+    }
+
+    @Get("/user/:id")
+    getUsersById(
+        @Param("id",ParseUUIDPipe) id:string
+    ){
+        return this.authService.getUserById(id);
+    }
+
+    @Get("/departments")
+    getAllDepartments(
+        @Query() paginationDto:PaginationDto
+    ){
+        return this.authService.findAllDepartments(paginationDto);
     }
 
     // @Get("private")

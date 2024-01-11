@@ -1,4 +1,4 @@
-import { IsArray, IsEmail, IsNotEmpty, IsString, Matches, MaxLength, MinLength } from "class-validator";
+import { IsArray, IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID, Matches, MaxLength, MinLength } from "class-validator";
 
 export class CreateUserDTO {
 
@@ -27,7 +27,17 @@ export class CreateUserDTO {
     })
     password:string;
 
-    @IsArray()
-    // @ValidateNested({each:true})
+    @IsArray({message:"El array de roles es necesario!"})
+    @IsUUID("4", { each: true, message: 'Cada elemento del array de roles debe ser un UUID válido' })
     roles:string[];
+
+    // @IsOptional()
+    // @IsUUID("4",{message:"El id del supervisor debe ser un UUID valido!"})
+    // supervisor?:string;
+
+    // @IsOptional()
+    // @IsUUID("4", { each: true, message: 'Cada elemento del array de personal debe ser un UUID válido' })
+    // personal?:string[];
+
+
 };

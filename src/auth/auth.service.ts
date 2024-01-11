@@ -19,6 +19,9 @@ import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { JwtService } from '@nestjs/jwt';
 import { Role } from './entities/role.entity';
 import { CreateRoleDTO } from './dto/create-role.dto';
+import { PaginationDto } from 'src/common/dtos/pagination.dto';
+import { CreateDepartmentDto } from './dto/create-department';
+import { Department } from './entities/department.entity';
 
 
 @Injectable()
@@ -33,20 +36,69 @@ export class AuthService {
 		@InjectRepository(Role)
 		private readonly roleRepository:Repository<Role>,
 
+		@InjectRepository(Department)
+		private readonly departmentRepository:Repository<Department>,
+
 		private readonly jwtService:JwtService // -> Proporcionado por el JWTMODULE Y LA EXPORTACION
 	){}
 
-	async createRole(createRoleDTO:CreateRoleDTO){
+	async createRole(createRoleDTO:CreateRoleDTO,user:User){
+
 		try {
-			const role = this.roleRepository.create(createRoleDTO);
+
+			const { departamento,...roleData } = createRoleDTO;
+
+			//Primero buscamos el usuario si NO esta no creamos el departamento
+			const userDB = await this.userRepository.findOneBy({id:user.id});
+			if(!userDB) throw new BadRequestException("Ningun usuario fue encontrado por ese id!");
+
+			//buscamos el departmento si NO esta no creamos el role
+			const department = await this.departmentRepository.findOneBy({id:departamento});
+			if(!department) throw new BadRequestException("Ningun departamento fue encontrado por ese id!");
+
+			const role = this.roleRepository.create({
+				...roleData,
+				departamento:department,
+				createdByUser:user
+			});
 			await this.roleRepository.save(role);
 
 			return {
-				...role
+				role,
+				message:"Rol creado!"
 			};
 
 		} catch (error) {
 			this.handleDBErrors(error);
+		}
+
+	}
+
+	async createDepartment(createDepartmentDto:CreateDepartmentDto,user:User){
+
+		try {
+
+			//Primero buscamos el usuario si NO esta no creamos el departamento
+			const userDB = await this.userRepository.findOneBy({id:user.id});
+			if(!userDB) throw new BadRequestException("Ningun usuario fue encontrado por ese id!");
+
+			const department = this.departmentRepository.create({
+				...createDepartmentDto,
+				createdByUser:user
+			});
+
+			await this.departmentRepository.save(department);
+
+			return {
+				department,
+				message:"Departamento creado!"
+			};
+
+
+
+
+		} catch (error) {
+			
 		}
 	}
 
@@ -85,6 +137,7 @@ export class AuthService {
 
 		return {
 			message:"Usuario creado con exito!",
+			user,
 			token:this.generateJWT({correo:user.correo,id:user.id})
 		};
 
@@ -108,6 +161,58 @@ export class AuthService {
 		};
 	}
 
+	async findAllUsers(
+		paginationDto:PaginationDto
+	){
+		return this.userRepository.createQueryBuilder("user")
+		.leftJoinAndSelect("user.roles","roles")
+		.leftJoinAndSelect("roles.departamento","departamento")
+		.leftJoinAndSelect("user.supervisor","supervisor")
+		.leftJoinAndSelect("user.personal","personal")
+		.skip(paginationDto.offset)
+		.take(paginationDto.limit)
+		.getMany()
+	}
+
+	async getUserById(id:string){
+		return this.userRepository.createQueryBuilder("user")
+		.leftJoinAndSelect("user.roles","roles")
+		.leftJoinAndSelect("user.supervisor","supervisor")
+		.leftJoinAndSelect("user.personal","personal")
+		.where("user.id = :id",{id})
+		.getOne();
+	}
+
+	async deleteAllUsers(){
+		const query = this.userRepository.createQueryBuilder("user");
+
+		try {
+			return query.delete().where({}).execute();
+		} catch (error) {
+			this.handleDBErrors(error);
+		}
+	}
+
+	async deleteAllDepartments(){
+		const query = this.departmentRepository.createQueryBuilder("department");
+		try {
+			return query.delete().where({}).execute();
+		} catch (error) {
+			this.handleDBErrors(error);
+		}
+	}
+
+	async findAllDepartments(
+		paginationDto:PaginationDto
+	){
+		return this.departmentRepository.createQueryBuilder("department")
+		.leftJoinAndSelect("department.roles","roles")
+		.skip(paginationDto.offset)
+		.limit(paginationDto.limit)
+		.getMany()
+	}
+
+
     private handleDBErrors(error:any):never{ //-> never jamas regresara algo
         if(error.code === "23505") throw new BadRequestException(error.detail);
 
@@ -122,3 +227,12 @@ export class AuthService {
 	}
 
 }
+
+/* 
+	metodos find (find,findOne,findOneBy) y queryBuilder() diferencias
+
+	con el metodo find nosotros podemos hacer busquedas simples en
+	nuestras entidades pero con el queryBuilder podemos hacer 
+	busquedas muchisimo mas complejas y uniendo con sus relaciones
+	Ide una manera mas sencilla.
+*/

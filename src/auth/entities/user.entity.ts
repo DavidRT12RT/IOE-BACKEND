@@ -1,5 +1,6 @@
 import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Role } from "./role.entity";
+import { Department } from "./department.entity";
 
 @Entity({name:"usuario"})
 export class User{
@@ -58,6 +59,18 @@ export class User{
         role => role.usuarios,
     )
     roles:Role[];
+
+    @OneToMany(
+        () => Department,
+        (department) => department.createdByUser
+    )
+    createdDepartments:Department[]; // -> Solo admins pueden crear departamentos , asi que este campo en la mayoria solo lo tendran los admins que a su vez pertenecen al departamento de sistemas, esto quiere decir que tenemo
+
+    @OneToMany(
+        () => Role,
+        (role) => role.createdByUser
+    )
+    createdRoles:Role[];
 
     //Triggers 
     @BeforeInsert()

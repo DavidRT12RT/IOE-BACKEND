@@ -14,13 +14,14 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 //Entities
 import { Role } from './entities/role.entity';
 import { User } from './entities/user.entity';
+import { Department } from './entities/department.entity';
 
 @Module({
   	controllers: [AuthController],
   	providers: [AuthService,JwtStrategy],
 	imports:[
 		ConfigModule,
-		TypeOrmModule.forFeature([User,Role]),
+		TypeOrmModule.forFeature([User,Role,Department]),
 		PassportModule.register({defaultStrategy:"jwt"}),
 		// JwtModule.register({
 		// 	secret:process.env.JWT_SECRET,
@@ -41,10 +42,11 @@ import { User } from './entities/user.entity';
 		})
 	],
 	exports:[
+		AuthService,
 		TypeOrmModule,
 		JwtStrategy,
 		PassportModule,
-		JwtModule
+		JwtModule,
 	]
 })
 export class AuthModule {}

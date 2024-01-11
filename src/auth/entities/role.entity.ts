@@ -1,5 +1,6 @@
-import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { User } from "./user.entity";
+import { Department } from "./department.entity";
 
 @Entity({name:"role"})
 export class Role {
@@ -22,9 +23,24 @@ export class Role {
     @ManyToMany(
         () => User,
         user => user.roles,
-        {eager:true}
+        {
+            eager:true,
+            onDelete:"CASCADE"
+        }
     )
     @JoinTable()
     usuarios:User[];
+
+    @ManyToOne(
+        () => Department,
+        (department) => department.roles,
+    )
+    departamento:Department;
+
+    @ManyToOne(
+        () => User,
+        (user) => user.createdDepartments
+    )
+    createdByUser:User;
 
 };
