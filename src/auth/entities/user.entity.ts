@@ -1,6 +1,8 @@
 import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Role } from "./role.entity";
 import { Department } from "./department.entity";
+import { Store } from "src/store/entities/store.entity";
+import { Warehouse } from "src/store/entities/warehouse.entity";
 
 @Entity({name:"usuario"})
 export class User{
@@ -46,7 +48,6 @@ export class User{
     )
     supervisor?:User;
 
-    
     @OneToMany( //->One user (supervisor) can have multiple users
         ()=> User,
         user => user.supervisor,
@@ -71,6 +72,18 @@ export class User{
         (role) => role.createdByUser
     )
     createdRoles:Role[];
+
+    @OneToMany(
+        () => Store,
+        (store) => store.usuarioCreador
+    )
+    sucursalesCreadas:Store[];
+
+    @OneToMany(
+        () => Warehouse,
+        (warehouse) => warehouse.responsable
+    )
+    almacenes:Warehouse[];
 
     //Triggers 
     @BeforeInsert()
