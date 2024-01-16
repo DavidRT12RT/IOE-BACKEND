@@ -3,7 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 //Entities
-import { User } from './entities/user.entity';
+import { Usuario } from './entities/usuario.entity';
+import { Departamento } from './entities/departamento.entity';
+import { Role } from './entities/role.entity';
 
 //DTO's
 import { CreateUserDTO } from './dto/create-user.dto';
@@ -13,16 +15,13 @@ import * as bcrypt from "bcrypt";
 
 //DTO's (Data Transfer Object)
 import { LoginUserDto } from './dto/login-user.dto';
+import { CreateRoleDTO } from './dto/create-role.dto';
+import { PaginationDto } from 'src/common/dtos/pagination.dto';
+import { CreateDepartmentDto } from './dto/create-department';
 
 //JWT
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { JwtService } from '@nestjs/jwt';
-import { Role } from './entities/role.entity';
-import { CreateRoleDTO } from './dto/create-role.dto';
-import { PaginationDto } from 'src/common/dtos/pagination.dto';
-import { CreateDepartmentDto } from './dto/create-department';
-import { Department } from './entities/department.entity';
-
 
 @Injectable()
 export class AuthService {
@@ -30,19 +29,19 @@ export class AuthService {
     private readonly logger = new Logger("AuthController");
 
 	constructor(
-		@InjectRepository(User) 
-		private readonly userRepository:Repository<User>,
+		@InjectRepository(Usuario) 
+		private readonly userRepository:Repository<Usuario>,
 
 		@InjectRepository(Role)
 		private readonly roleRepository:Repository<Role>,
 
-		@InjectRepository(Department)
-		private readonly departmentRepository:Repository<Department>,
+		@InjectRepository(Departamento)
+		private readonly departmentRepository:Repository<Departamento>,
 
 		private readonly jwtService:JwtService // -> Proporcionado por el JWTMODULE Y LA EXPORTACION
 	){}
 
-	async createRole(createRoleDTO:CreateRoleDTO,user:User){
+	async createRole(createRoleDTO:CreateRoleDTO,user:Usuario){
 
 		try {
 
@@ -59,7 +58,7 @@ export class AuthService {
 			const role = this.roleRepository.create({
 				...roleData,
 				departamento:department,
-				createdByUser:user
+				creadoPorUsuario:user
 			});
 			await this.roleRepository.save(role);
 
@@ -74,7 +73,7 @@ export class AuthService {
 
 	}
 
-	async createDepartment(createDepartmentDto:CreateDepartmentDto,user:User){
+	async createDepartment(createDepartmentDto:CreateDepartmentDto,user:Usuario){
 
 		try {
 
@@ -82,23 +81,21 @@ export class AuthService {
 			const userDB = await this.userRepository.findOneBy({id:user.id});
 			if(!userDB) throw new BadRequestException("Ningun usuario fue encontrado por ese id!");
 
-			const department = this.departmentRepository.create({
+			const departamento = this.departmentRepository.create({
 				...createDepartmentDto,
-				createdByUser:user
+				creadoPorUsuario:user
 			});
 
-			await this.departmentRepository.save(department);
+			await this.departmentRepository.save(departamento);
 
 			return {
-				department,
+				departamento,
 				message:"Departamento creado!"
 			};
 
 
-
-
 		} catch (error) {
-			
+			this.handleDBErrors(error);
 		}
 	}
 
@@ -164,7 +161,7 @@ export class AuthService {
 	async findAllUsers(
 		paginationDto:PaginationDto
 	){
-		return this.userRepository.createQueryBuilder("user")
+		const users = await this.userRepository.createQueryBuilder("user")
 		.leftJoinAndSelect("user.roles","roles")
 		.leftJoinAndSelect("roles.departamento","departamento")
 		.leftJoinAndSelect("user.supervisor","supervisor")
@@ -172,15 +169,24 @@ export class AuthService {
 		.skip(paginationDto.offset)
 		.take(paginationDto.limit)
 		.getMany()
+
+		return {
+			users
+		};
 	}
 
 	async getUserById(id:string){
-		return this.userRepository.createQueryBuilder("user")
+
+		const user = await this.userRepository.createQueryBuilder("user")
 		.leftJoinAndSelect("user.roles","roles")
 		.leftJoinAndSelect("user.supervisor","supervisor")
 		.leftJoinAndSelect("user.personal","personal")
 		.where("user.id = :id",{id})
 		.getOne();
+
+		if(!user) throw new NotFoundException(`Ningun usuario por ese id ${id}`);
+
+		return user;
 	}
 
 	async deleteAllUsers(){

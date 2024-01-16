@@ -13,15 +13,15 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 
 //Entities
 import { Role } from './entities/role.entity';
-import { User } from './entities/user.entity';
-import { Department } from './entities/department.entity';
+import { Usuario } from './entities/usuario.entity';
+import { Departamento } from './entities/departamento.entity';
 
 @Module({
   	controllers: [AuthController],
   	providers: [AuthService,JwtStrategy],
 	imports:[
 		ConfigModule,
-		TypeOrmModule.forFeature([User,Role,Department]),
+		TypeOrmModule.forFeature([Usuario,Role,Departamento]),
 		PassportModule.register({defaultStrategy:"jwt"}),
 		// JwtModule.register({
 		// 	secret:process.env.JWT_SECRET,

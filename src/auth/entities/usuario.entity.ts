@@ -1,11 +1,10 @@
 import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Role } from "./role.entity";
-import { Department } from "./department.entity";
-import { Store } from "src/store/entities/store.entity";
-import { Warehouse } from "src/store/entities/warehouse.entity";
+import { Departamento } from "./departamento.entity";
+import { Sucursal } from "src/sucursales/entities/sucursal.entity";
 
-@Entity({name:"usuario"})
-export class User{
+// @Entity({name:"usuario"})
+export class Usuario{
 
     @PrimaryGeneratedColumn("uuid")
     id:string;
@@ -41,19 +40,19 @@ export class User{
    
     //Relaciones
     // -> Self refering
-    @ManyToOne( // ->Many user can have one supervisor
-        () => User, 
-        user => user.personal,
+    @ManyToOne( // ->Many usuario can have one supervisor
+        () => Usuario, 
+        usuario => usuario.personal,
         {onDelete:"SET NULL",nullable:true}
     )
-    supervisor?:User;
+    supervisor?:Usuario;
 
-    @OneToMany( //->One user (supervisor) can have multiple users
-        ()=> User,
-        user => user.supervisor,
+    @OneToMany( //->One usuario (supervisor) can have multiple usuarios
+        ()=> Usuario,
+        usuario => usuario.supervisor,
         {nullable:true}
     )
-    personal?:User[];
+    personal?:Usuario[];
 
     @ManyToMany(
         () => Role,
@@ -61,29 +60,30 @@ export class User{
     )
     roles:Role[];
 
-    @OneToMany(
-        () => Department,
-        (department) => department.createdByUser
-    )
-    createdDepartments:Department[]; // -> Solo admins pueden crear departamentos , asi que este campo en la mayoria solo lo tendran los admins que a su vez pertenecen al departamento de sistemas, esto quiere decir que tenemo
 
     @OneToMany(
         () => Role,
-        (role) => role.createdByUser
+        (role) => role.creadoPorUsuario
     )
-    createdRoles:Role[];
+    rolesCreados:Role[];
 
     @OneToMany(
-        () => Store,
-        (store) => store.usuarioCreador
+        () => Departamento,
+        (departamento) => departamento.creadoPorUsuario
     )
-    sucursalesCreadas:Store[];
+    departamentosCreados:Departamento[];// -> Solo admins pueden crear departamentos , asi que este campo en la mayoria solo lo tendran los admins que a su vez pertenecen al departamento de sistemas, esto quiere decir que tenemo
 
     @OneToMany(
-        () => Warehouse,
-        (warehouse) => warehouse.responsable
+        () => Sucursal,
+        (sucursal) => sucursal.usuarioCreador
     )
-    almacenes:Warehouse[];
+    sucursalesCreadas:Sucursal[];
+
+    // @OneToMany(
+    //     () => Warehouse,
+    //     (warehouse) => warehouse.responsable
+    // )
+    // almacenes:Warehouse[];
 
     //Triggers 
     @BeforeInsert()

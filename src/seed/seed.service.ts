@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 
 //Entities
-import { User } from 'src/auth/entities/user.entity';
+import { Usuario } from 'src/auth/entities/usuario.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthService } from 'src/auth/auth.service';
 import { initialData } from './data/seed.data';
-import { Department } from 'src/auth/entities/department.entity';
+import { Departamento } from 'src/auth/entities/departamento.entity';
 
 @Injectable()
 export class SeedService {
@@ -14,11 +14,11 @@ export class SeedService {
 	constructor(
 		private readonly authService:AuthService,
 
-		@InjectRepository(User)
-		private readonly userRepository:Repository<User>,
+		@InjectRepository(Usuario)
+		private readonly userRepository:Repository<Usuario>,
 
-		@InjectRepository(Department)
-		private readonly departmentRepository:Repository<Department>
+		@InjectRepository(Departamento)
+		private readonly departmentRepository:Repository<Departamento>
 
 	){}
 
@@ -27,7 +27,7 @@ export class SeedService {
 		//Eliminamos todas las tablas que ya fueron creadas 
 		await this.deleteTables();
 		
-		/*rimero creamos el usuario "system" que sera el primer 
+		/*primero creamos el usuario "system" que sera el primer 
 		usuario del sistema y el que creara a los otros usuarios y 
 		primer departamento que es sistema */
 

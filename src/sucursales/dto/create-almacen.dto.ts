@@ -1,6 +1,6 @@
 import { IsString, IsUUID } from "class-validator";
 
-export class CreateWarehouseDto{
+export class CreateAlmacenDto{
 
     @IsString({message:"El nombre del almacen necesita ser un string"})
     nombre:string;

@@ -1,14 +1,22 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, BadRequestException, Logger, InternalServerErrorException, UseGuards, Req, Headers, SetMetadata, Query, ParseUUIDPipe } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateUserDTO } from './dto/create-user.dto';
-import { LoginUserDto } from './dto/login-user.dto';
+
+//Decorators
 import { GetUser } from './decorators/get-user.decorator';
-import { User } from './entities/user.entity';
-import { CreateRoleDTO } from './dto/create-role.dto';
 import { Auth } from './decorators';
+
 import { ValidRoles } from './interfaces';
+
+//Dto's
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { CreateDepartmentDto } from './dto/create-department';
+import { CreateRoleDTO } from './dto/create-role.dto';
+
+import { CreateUserDTO } from './dto/create-user.dto';
+import { LoginUserDto } from './dto/login-user.dto';
+
+//Entities
+import { Usuario } from './entities/usuario.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -24,7 +32,7 @@ export class AuthController {
     @Auth()
     createRole(
         @Body() createRoleDTO:CreateRoleDTO,
-        @GetUser() user:User
+        @GetUser() user:Usuario
     ) {
         return this.authService.createRole(createRoleDTO,user);
     }
@@ -33,7 +41,7 @@ export class AuthController {
     @Auth()
     createDepartment(
         @Body() createDepartmentDto:CreateDepartmentDto,
-        @GetUser() user:User
+        @GetUser() user:Usuario
     ){
         return this.authService.createDepartment(createDepartmentDto,user);
     }
@@ -105,7 +113,7 @@ export class AuthController {
     @Get("private4")
     @Auth(ValidRoles.admin,ValidRoles.user)
     testingPrivateRoute4(
-        @GetUser() user:User
+        @GetUser() user:Usuario
     ) {
 
         return "Bienvenido!";

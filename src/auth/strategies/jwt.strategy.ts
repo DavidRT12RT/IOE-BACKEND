@@ -3,7 +3,7 @@ import { PassportStrategy } from "@nestjs/passport";
 
 import { JwtPayload } from "../interfaces/jwt-payload.interface";
 
-import { User } from "../entities/user.entity";
+import { Usuario } from "../entities/usuario.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ConfigService } from "@nestjs/config";
 import { Repository } from "typeorm";
@@ -13,8 +13,8 @@ import { Injectable, UnauthorizedException } from "@nestjs/common";
 export class JwtStrategy extends PassportStrategy(Strategy){
 
     constructor(
-        @InjectRepository(User)
-        private readonly userRepository: Repository<User>,
+        @InjectRepository(Usuario)
+        private readonly userRepository: Repository<Usuario>,
 
         configService: ConfigService
     ) {
@@ -24,7 +24,7 @@ export class JwtStrategy extends PassportStrategy(Strategy){
         });
     }
 
-    async validate(payload:JwtPayload):Promise<User>{
+    async validate(payload:JwtPayload):Promise<Usuario>{
         /* Cuando tengamos un user que su firma sea valida y su fecha de creacion es valida retornara el usuario*/
         const { id } = payload;
 

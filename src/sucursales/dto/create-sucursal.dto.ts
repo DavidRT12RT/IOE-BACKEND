@@ -1,6 +1,6 @@
 import { IsString } from "class-validator";
 
-export class CreateStoreDto {
+export class CreateSucursalDto {
     
     @IsString({message:"La zona de la sucursal es necesaria!"})
     zona:string;

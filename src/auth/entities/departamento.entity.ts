@@ -1,9 +1,10 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+
 import { Role } from "./role.entity";
-import { User } from "./user.entity";
+import { Usuario } from "./usuario.entity";
 
 @Entity("departamentos")
-export class Department{
+export class Departamento{
 
     @PrimaryGeneratedColumn("uuid")
     id:string;
@@ -14,6 +15,18 @@ export class Department{
     @Column()
     descripcion:string;
 
+    @CreateDateColumn()
+    fecha_registro:Date;
+
+    @UpdateDateColumn()
+    fecha_actualizacion:Date;
+
+    @ManyToOne(
+        () => Usuario,
+        (usuario) => usuario
+    )
+    creadoPorUsuario:Usuario;
+
     @OneToMany(
         () => Role,
         role => role.departamento,
@@ -23,18 +36,5 @@ export class Department{
         }
     )
     roles:Role[];
-
-
-    @CreateDateColumn()
-    fecha_registro:Date;
-
-    @UpdateDateColumn()
-    fecha_actualizacion:Date;
-
-    @ManyToOne(
-        () => User,
-        (user) => user.createdDepartments
-    )
-    createdByUser:User;
 
 };

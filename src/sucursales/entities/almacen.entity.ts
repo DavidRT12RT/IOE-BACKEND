@@ -1,9 +1,8 @@
-import { User } from "src/auth/entities/user.entity";
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
-import { Store } from "./store.entity";
+import { Sucursal } from "./sucursal.entity";
 
 @Entity("almacen")
-export class Warehouse {
+export class Almacen{
     
     @PrimaryGeneratedColumn("uuid")
     id:string;
@@ -17,20 +16,20 @@ export class Warehouse {
     @Column()
     tipo_almacen:string;
 
-    @ManyToOne(
-        () => User,
-        (user) => user.almacenes,
-        {
-            nullable:true
-        }
-    )
-    responsable:User;
+    // @ManyToOne(
+    //     () => User,
+    //     (user) => user.almacenes,
+    //     {
+    //         nullable:true
+    //     }
+    // )
+    // responsable:User;
 
     @ManyToOne(
-        () => Store,
-        (store) => store.almacenes
+        () => Sucursal,
+        (sucursal) => sucursal.almacenes
     )
-    sucursal:Store;
+    sucursal:Almacen;
 
     @CreateDateColumn()
     fecha_registro:Date;
