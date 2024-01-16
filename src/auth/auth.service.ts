@@ -83,7 +83,7 @@ export class AuthService {
 
 			const departamento = this.departmentRepository.create({
 				...createDepartmentDto,
-				creadoPorUsuario:user
+				creadoPorUsuario:userDB
 			});
 
 			await this.departmentRepository.save(departamento);

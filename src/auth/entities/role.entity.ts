@@ -4,7 +4,7 @@ import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, Pri
 import { Usuario } from "./usuario.entity";
 import { Departamento } from "./departamento.entity";
 
-@Entity({name:"role"})
+@Entity()
 export class Role {
 
     @PrimaryGeneratedColumn("uuid")

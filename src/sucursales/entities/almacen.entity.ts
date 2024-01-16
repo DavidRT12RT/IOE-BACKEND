@@ -1,7 +1,8 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Sucursal } from "./sucursal.entity";
+import { Producto } from "src/productos/entities/producto.entity";
 
-@Entity("almacen")
+@Entity()
 export class Almacen{
     
     @PrimaryGeneratedColumn("uuid")
@@ -25,16 +26,24 @@ export class Almacen{
     // )
     // responsable:User;
 
-    @ManyToOne(
-        () => Sucursal,
-        (sucursal) => sucursal.almacenes
-    )
-    sucursal:Almacen;
 
     @CreateDateColumn()
     fecha_registro:Date;
 
     @UpdateDateColumn()
     fecha_actualizacion:Date;
+    
+    //Relaciones
+    @ManyToOne(
+        () => Sucursal,
+        (sucursal) => sucursal.almacenes
+    )
+    sucursal:Almacen;
+
+    @OneToMany(
+        () => Producto,
+        (producto) => producto.almacen
+    )
+    productos:Producto[];
 
 };

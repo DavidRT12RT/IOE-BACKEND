@@ -47,4 +47,12 @@ export class SucursalController {
 		return this.sucursalService.findAllSucursales(paginationDto);
 	}
 
+	@Get("almacen")
+	@Auth()
+	getAllAlmacen(
+		@Query() paginationDto:PaginationDto
+	){
+		return this.sucursalService.findAllAlmacenes(paginationDto);
+	}
+
 }

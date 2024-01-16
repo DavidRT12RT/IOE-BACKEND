@@ -3,7 +3,7 @@ import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGenerate
 import { Role } from "./role.entity";
 import { Usuario } from "./usuario.entity";
 
-@Entity("departamentos")
+@Entity()
 export class Departamento{
 
     @PrimaryGeneratedColumn("uuid")

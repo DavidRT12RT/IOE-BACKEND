@@ -19,6 +19,10 @@ import { Almacen } from './entities/almacen.entity';
 			Sucursal,
 			Almacen
 		]),
+	],
+	exports:[
+		SucursalService,
+		TypeOrmModule
 	]
 })
-export class StoreModule {}
+export class SucursalModule {}

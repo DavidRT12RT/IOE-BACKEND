@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -91,17 +91,55 @@ export class SucursalService {
 
   	}
 
-  	// findOne(id: number) {
-    // 	return `This action returns a #${id} store`;
-  	// }
+	async findAllAlmacenes(
+		paginationDto:PaginationDto
+	){
 
-  	// update(id: number, updateStoreDto: UpdateStoreDto) {
-    // 	return `This action updates a #${id} store`;
-  	// }
+		const { limit = 10, offset = 0 } = paginationDto;
 
-  	// remove(id: number) {
-    // 	return `This action removes a #${id} store`;
-  	// }
+		const almacenes = await this.almacenRepository.createQueryBuilder("almacen")
+		.leftJoinAndSelect("almacen.productos","productos")
+		.skip(offset)
+		.limit(limit)
+		.getMany();
+
+
+		return {
+			almacenes
+		};
+
+	}
+
+  	async findOneSucursal(
+		id: string
+	) {
+		const sucursal = await this.sucursalRepository.createQueryBuilder("sucursal")
+		.where("sucursal.id = :id",{id})
+		.leftJoinAndSelect("sucursal.almacenes","almacenes")
+		.getOne();
+
+		if(!sucursal) throw new NotFoundException(`Ninguna sucursal encontrada por id ${id}`);
+		return {
+			sucursal
+		};
+
+  	}
+
+  	async findOneAlmacen(
+		id: string
+	) {
+		const almacen = await this.almacenRepository.createQueryBuilder("almacen")
+		.where("almacen.id = :id",{id})
+		.leftJoinAndSelect("almacen.sucursal","sucursal")
+		.getOne();
+
+		if(!almacen) throw new NotFoundException(`Ningun almacen encontrado por id ${id}`);
+
+		return {
+			almacen
+		};
+  	}
+
 
     private handleDBErrors(error:any):never{ //-> never jamas regresara algo
         if(error.code === "23505") throw new BadRequestException(error.detail);

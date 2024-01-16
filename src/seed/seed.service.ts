@@ -35,7 +35,7 @@ export class SeedService {
 
 		const { user:systemUser } = await this.authService.createUser(SystemUser);
 
-		const { department:systemDepartment } = await this.authService.createDepartment(SystemDepartment,systemUser);
+		const { departamento:systemDepartment } = await this.authService.createDepartment(SystemDepartment,systemUser);
 
 		const { role:adminRole } = await this.authService.createRole({...AdminRole,departamento:systemDepartment.id},systemUser);
 

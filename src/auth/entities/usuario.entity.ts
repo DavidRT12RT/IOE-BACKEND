@@ -2,8 +2,10 @@ import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, ManyToMan
 import { Role } from "./role.entity";
 import { Departamento } from "./departamento.entity";
 import { Sucursal } from "src/sucursales/entities/sucursal.entity";
+import { Producto } from "src/productos/entities/producto.entity";
+import { Categoria } from "src/productos/entities/categoria.entity";
 
-// @Entity({name:"usuario"})
+@Entity()
 export class Usuario{
 
     @PrimaryGeneratedColumn("uuid")
@@ -68,6 +70,12 @@ export class Usuario{
     rolesCreados:Role[];
 
     @OneToMany(
+        () => Producto,
+        (producto) => producto.usuarioCreador
+    )
+    productosCreados:Producto[];
+
+    @OneToMany(
         () => Departamento,
         (departamento) => departamento.creadoPorUsuario
     )
@@ -78,6 +86,12 @@ export class Usuario{
         (sucursal) => sucursal.usuarioCreador
     )
     sucursalesCreadas:Sucursal[];
+
+    @OneToMany(
+        () => Categoria,
+        (categoria) => categoria.usuarioCreador
+    )
+    categoriasCreadas:Categoria[];
 
     // @OneToMany(
     //     () => Warehouse,

@@ -2,6 +2,7 @@ import { Usuario } from "src/auth/entities/usuario.entity";
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Almacen } from './almacen.entity';
 
+@Entity()
 export class Sucursal {
 
     @PrimaryGeneratedColumn("uuid")
