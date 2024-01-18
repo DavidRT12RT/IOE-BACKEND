@@ -1,16 +1,17 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { CreateProductoDto } from './dto/create-producto.dto';
-import { UpdateProductoDto } from './dto/update-producto.dto';
 
 //Entities
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Usuario } from 'src/auth/entities/usuario.entity';
 import { Producto } from './entities/producto.entity';
+
 import { SucursalService } from 'src/sucursales/sucursales.service';
+import { CategoriasService } from './categorias.service';
+
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
-import { Categoria } from './entities/categoria.entity';
-import { CreateCategoriaDto } from './dto/create-categoria.dto';
+import { AlmacenesService } from 'src/sucursales/almacenes.service';
 
 @Injectable()
 export class ProductosService {
@@ -18,14 +19,12 @@ export class ProductosService {
 	private readonly logger = new Logger("ProductosService");
 
 	constructor(
-		private readonly sucursalService:SucursalService,
+		private readonly almacenService:AlmacenesService,
 
 		@InjectRepository(Producto)
 		private readonly productoRepository:Repository<Producto>,
 		
-		@InjectRepository(Categoria)
-		private readonly categoriaRepository:Repository<Categoria>,
-
+		private readonly categoriasService:CategoriasService
 	){}
 
  	async createProducto(createProductoDto: CreateProductoDto,user:Usuario) {
@@ -35,10 +34,10 @@ export class ProductosService {
 			const { categoria:categoriaID,almacen:almacenID,...productoDtoData } = createProductoDto;
 
 			//Primero buscamos el almacen y comprobamos que exista
-			const { almacen } = await this.sucursalService.findOneAlmacen(almacenID);
+			const { almacen } = await this.almacenService.findOneAlmacen(almacenID);
 
 			//Despues buscamos la categoria y comprobamos que exista
-			const { categoria } = await this.findOneCategoria(categoriaID);
+			const { categoria } = await this.categoriasService.findOneCategoria(categoriaID);
 			
 
 			const producto = this.productoRepository.create({
@@ -61,26 +60,7 @@ export class ProductosService {
 
   	}
 
-	async createCategoria(createCategoria:CreateCategoriaDto,user){
 
-		try {
-
-			const categoria = this.categoriaRepository.create({
-				...createCategoria,
-				usuarioCreador:user
-			});
-
-			await this.categoriaRepository.save(categoria);
-
-			return {
-				categoria,
-				message:"Categoria creada con exito!"
-			};
-
-		} catch (error) {
-			this.handleDBErrors(error);
-		}
-	}
 
   	async findAllProductos(
 		paginationDto:PaginationDto
@@ -100,42 +80,6 @@ export class ProductosService {
 		}
 
   	}
-
-	async findAllCategorias(
-		paginationDto:PaginationDto
-	) {
-
-		const { limit = 10, offset = 0 } = paginationDto;
-
-		const categorias = await this.categoriaRepository.createQueryBuilder("categoria")
-		.leftJoinAndSelect("categoria.productos","productos")
-		.leftJoinAndSelect("productos.almacen","almacen")
-		.leftJoinAndSelect("almacen.sucursal","sucursal")
-		.skip(offset)
-		.limit(limit)
-		.getMany()
-
-		return {
-			categorias
-		}
-
-  	}
-	
-	async findOneCategoria(id:string){
-
-		const categoria = await this.categoriaRepository.createQueryBuilder("categoria")
-		.where("categoria.id = :id",{id})
-		.leftJoinAndSelect("categoria.productos","productos")
-		.getOne();
-
-		if(!categoria) throw new NotFoundException(`Ninguna categoria encontrada por el id ${id}`);
-
-		return {
-			categoria
-		};
-
-	}
-
 
 
     private handleDBErrors(error:any):never{ //-> never jamas regresara algo

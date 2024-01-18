@@ -29,24 +29,7 @@ export class ProductosController {
     	return this.productosService.findAllProductos(paginationDto);
   	}
 
-	@Post("categorias")
-	@Auth()
-	createCategoria(
-		@Body() createCategoriaDto:CreateCategoriaDto,
-		@GetUser() user:Usuario
-	){
 
-		return this.productosService.createCategoria(createCategoriaDto,user);
-	}
-
-	@Get("categorias")
-	@Auth()
-	findAllCategorias(
-		@Query() paginationDto:PaginationDto
-	){
-
-		return this.productosService.findAllCategorias(paginationDto);
-	}
 
 
 }

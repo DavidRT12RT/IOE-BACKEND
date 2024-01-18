@@ -7,12 +7,18 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AuthService } from 'src/auth/auth.service';
 import { initialData } from './data/seed.data';
 import { Departamento } from 'src/auth/entities/departamento.entity';
+import { UsuariosService } from 'src/auth/usuarios.service';
+import { DepartamentosService } from 'src/auth/departamentos.service';
 
 @Injectable()
 export class SeedService {
 
 	constructor(
 		private readonly authService:AuthService,
+
+		private readonly usuariosService:UsuariosService,
+
+		private readonly departamentosService:DepartamentosService,
 
 		@InjectRepository(Usuario)
 		private readonly userRepository:Repository<Usuario>,
@@ -33,9 +39,9 @@ export class SeedService {
 
 		const { SystemUser,SystemDepartment,AdminRole } = initialData;
 
-		const { user:systemUser } = await this.authService.createUser(SystemUser);
+		const { user:systemUser } = await this.usuariosService.createUser(SystemUser);
 
-		const { departamento:systemDepartment } = await this.authService.createDepartment(SystemDepartment,systemUser);
+		const { departamento:systemDepartment } = await this.departamentosService.createDepartment(SystemDepartment,systemUser);
 
 		const { role:adminRole } = await this.authService.createRole({...AdminRole,departamento:systemDepartment.id},systemUser);
 

@@ -41,16 +41,15 @@ export class Usuario{
     fecha_actualizacion:Date;
    
     //Relaciones
-    // -> Self refering
-    @ManyToOne( // ->Many usuario can have one supervisor
+    @ManyToOne( 
         () => Usuario, 
         usuario => usuario.personal,
         {onDelete:"SET NULL",nullable:true}
     )
     supervisor?:Usuario;
 
-    @OneToMany( //->One usuario (supervisor) can have multiple usuarios
-        ()=> Usuario,
+    @OneToMany( 
+        () => Usuario,
         usuario => usuario.supervisor,
         {nullable:true}
     )
@@ -92,12 +91,6 @@ export class Usuario{
         (categoria) => categoria.usuarioCreador
     )
     categoriasCreadas:Categoria[];
-
-    // @OneToMany(
-    //     () => Warehouse,
-    //     (warehouse) => warehouse.responsable
-    // )
-    // almacenes:Warehouse[];
 
     //Triggers 
     @BeforeInsert()

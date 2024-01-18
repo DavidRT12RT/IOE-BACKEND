@@ -16,12 +16,11 @@ import * as bcrypt from "bcrypt";
 //DTO's (Data Transfer Object)
 import { LoginUserDto } from './dto/login-user.dto';
 import { CreateRoleDTO } from './dto/create-role.dto';
-import { PaginationDto } from 'src/common/dtos/pagination.dto';
-import { CreateDepartmentDto } from './dto/create-department';
 
 //JWT
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { JwtService } from '@nestjs/jwt';
+import { handleDBErrors } from 'src/common/helpers/db_errors';
 
 @Injectable()
 export class AuthService {
@@ -68,77 +67,12 @@ export class AuthService {
 			};
 
 		} catch (error) {
-			this.handleDBErrors(error);
+			handleDBErrors(error);
 		}
 
 	}
 
-	async createDepartment(createDepartmentDto:CreateDepartmentDto,user:Usuario){
 
-		try {
-
-			//Primero buscamos el usuario si NO esta no creamos el departamento
-			const userDB = await this.userRepository.findOneBy({id:user.id});
-			if(!userDB) throw new BadRequestException("Ningun usuario fue encontrado por ese id!");
-
-			const departamento = this.departmentRepository.create({
-				...createDepartmentDto,
-				creadoPorUsuario:userDB
-			});
-
-			await this.departmentRepository.save(departamento);
-
-			return {
-				departamento,
-				message:"Departamento creado!"
-			};
-
-
-		} catch (error) {
-			this.handleDBErrors(error);
-		}
-	}
-
-	async createUser(createUserDTO: CreateUserDTO) {
-
-		const { roles,...userData } = createUserDTO;
-
-		//Verificar que todos los roles existan primero antes de registrar el usuario
-		for(const roleId of roles){
-			const roleDB = await this.roleRepository.findOneBy({id:roleId})
-			if(!roleDB) throw new BadRequestException(`El rol con id ${roleId} no existe,la creacion fue cancelada!`);
-		}
-
-		userData.password = bcrypt.hashSync(createUserDTO.password,10);
-
-		let user = this.userRepository.create({
-			...userData,
-			roles:[]
-		});
-
-		user = await this.userRepository.save(user);
-
-		for(const roleId of roles){
-
-			const roleDB = await this.roleRepository.findOneBy({id:roleId})
-
-			roleDB.usuarios.push(user);
-			await this.roleRepository.save(roleDB);
-
-			user.roles.push(roleDB);
-
-		}
-
-		user = await this.userRepository.save(user);
-		delete user.password;
-
-		return {
-			message:"Usuario creado con exito!",
-			user,
-			token:this.generateJWT({correo:user.correo,id:user.id})
-		};
-
-  	}
 
 	async loginUser(loginUserDto:LoginUserDto){
 		const { correo,password } = loginUserDto;
@@ -158,76 +92,9 @@ export class AuthService {
 		};
 	}
 
-	async findAllUsers(
-		paginationDto:PaginationDto
-	){
-		const users = await this.userRepository.createQueryBuilder("user")
-		.leftJoinAndSelect("user.roles","roles")
-		.leftJoinAndSelect("roles.departamento","departamento")
-		.leftJoinAndSelect("user.supervisor","supervisor")
-		.leftJoinAndSelect("user.personal","personal")
-		.skip(paginationDto.offset)
-		.take(paginationDto.limit)
-		.getMany()
-
-		return {
-			users
-		};
-	}
-
-	async getUserById(id:string){
-
-		const user = await this.userRepository.createQueryBuilder("user")
-		.leftJoinAndSelect("user.roles","roles")
-		.leftJoinAndSelect("user.supervisor","supervisor")
-		.leftJoinAndSelect("user.personal","personal")
-		.where("user.id = :id",{id})
-		.getOne();
-
-		if(!user) throw new NotFoundException(`Ningun usuario por ese id ${id}`);
-
-		return user;
-	}
-
-	async deleteAllUsers(){
-		const query = this.userRepository.createQueryBuilder("user");
-
-		try {
-			return query.delete().where({}).execute();
-		} catch (error) {
-			this.handleDBErrors(error);
-		}
-	}
-
-	async deleteAllDepartments(){
-		const query = this.departmentRepository.createQueryBuilder("department");
-		try {
-			return query.delete().where({}).execute();
-		} catch (error) {
-			this.handleDBErrors(error);
-		}
-	}
-
-	async findAllDepartments(
-		paginationDto:PaginationDto
-	){
-		return this.departmentRepository.createQueryBuilder("department")
-		.leftJoinAndSelect("department.roles","roles")
-		.skip(paginationDto.offset)
-		.limit(paginationDto.limit)
-		.getMany()
-	}
 
 
-    private handleDBErrors(error:any):never{ //-> never jamas regresara algo
-        if(error.code === "23505") throw new BadRequestException(error.detail);
-
-        this.logger.error(error);
-
-        throw new InternalServerErrorException("Please check server logs...");
-    }
-
-	private generateJWT(payload:JwtPayload){
+	generateJWT(payload:JwtPayload){
 		const token = this.jwtService.sign(payload);
 		return token;
 	}

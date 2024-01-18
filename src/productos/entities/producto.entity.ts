@@ -30,6 +30,7 @@ export class Producto {
     @UpdateDateColumn()
     fecha_actualizacion:Date;
 
+	//Relaciones
 	@ManyToOne(
 		() => Usuario,
 		(usuario) => usuario.productosCreados
