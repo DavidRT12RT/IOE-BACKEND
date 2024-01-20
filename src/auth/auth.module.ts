@@ -2,12 +2,11 @@ import { Module } from '@nestjs/common';
 
 //Controller's
 import { UsuariosController } from './usuarios.controller';
-import { DepartamentoController } from './departamentos.controller';
 import { AuthController } from './auth.controller';
 
 //Services's
 import { UsuariosService } from './usuarios.service';
-import { DepartamentosService } from './departamentos.service';
+import { DepartamentosService } from '../departamentos/departamentos.service';
 import { AuthService } from './auth.service';
 
 //Authentication
@@ -18,21 +17,19 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 
 //Entities
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Role } from './entities/role.entity';
+import { Role } from '../departamentos/entities/role.entity';
 import { Usuario } from './entities/usuario.entity';
-import { Departamento } from './entities/departamento.entity';
+import { Departamento } from '../departamentos/entities/departamento.entity';
 
 
 @Module({
   	controllers: [
 		AuthController,
 		UsuariosController,
-		DepartamentoController
 	],
   	providers: [
 		AuthService,
 		UsuariosService,
-		DepartamentosService,
 		JwtStrategy
 	],
 	imports:[
@@ -54,7 +51,6 @@ import { Departamento } from './entities/departamento.entity';
 	exports:[
 		AuthService,
 		UsuariosService,
-		DepartamentosService,
 		TypeOrmModule,
 		JwtStrategy,
 		PassportModule,

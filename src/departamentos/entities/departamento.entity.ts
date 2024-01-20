@@ -1,7 +1,7 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 import { Role } from "./role.entity";
-import { Usuario } from "./usuario.entity";
+import { Usuario } from "../../auth/entities/usuario.entity";
 
 @Entity()
 export class Departamento{

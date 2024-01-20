@@ -12,6 +12,7 @@ interface SeedUser{
     correo:string;
     password:string;
     roles:string[];
+    telefono:string;
 };
 
 interface SeedDepartment{
@@ -34,6 +35,7 @@ export const initialData:SeedData = {
 		apellido_paterno:"system",
 		correo:"system@distribuidoraioe.com",
 		password:"admin1234oO",
+        telefono:"229712025",
 		roles:[]
 	},
 	SystemDepartment:{
@@ -45,5 +47,5 @@ export const initialData:SeedData = {
 	AdminRole:{
 		nombre:"admin",
 		descripcion:"Rol de administrador de sistemas IOE",
-	}
+	},
 };

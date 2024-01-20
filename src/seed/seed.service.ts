@@ -6,9 +6,10 @@ import { Usuario } from 'src/auth/entities/usuario.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthService } from 'src/auth/auth.service';
 import { initialData } from './data/seed.data';
-import { Departamento } from 'src/auth/entities/departamento.entity';
+import { Departamento } from 'src/departamentos/entities/departamento.entity';
 import { UsuariosService } from 'src/auth/usuarios.service';
-import { DepartamentosService } from 'src/auth/departamentos.service';
+import { DepartamentosService } from 'src/departamentos/departamentos.service';
+import { RolesService } from 'src/departamentos/roles.service';
 
 @Injectable()
 export class SeedService {
@@ -19,6 +20,8 @@ export class SeedService {
 		private readonly usuariosService:UsuariosService,
 
 		private readonly departamentosService:DepartamentosService,
+
+		private readonly rolesService:RolesService,
 
 		@InjectRepository(Usuario)
 		private readonly userRepository:Repository<Usuario>,
@@ -39,11 +42,11 @@ export class SeedService {
 
 		const { SystemUser,SystemDepartment,AdminRole } = initialData;
 
-		const { user:systemUser } = await this.usuariosService.createUser(SystemUser);
+		const { usuario:systemUser } = await this.usuariosService.createUser(SystemUser);
 
 		const { departamento:systemDepartment } = await this.departamentosService.createDepartment(SystemDepartment,systemUser);
 
-		const { role:adminRole } = await this.authService.createRole({...AdminRole,departamento:systemDepartment.id},systemUser);
+		const { role:adminRole } = await this.rolesService.createRole({...AdminRole,departamento:systemDepartment.id},systemUser);
 
 		systemUser.roles.push(adminRole);
 		this.userRepository.save(systemUser);

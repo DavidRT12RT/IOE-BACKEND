@@ -1,14 +1,15 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { PaginationDto } from "src/common/dtos/pagination.dto";
 import { Usuario } from "./entities/usuario.entity";
-import { CreateUserDTO } from "./dto/create-user.dto";
+import { CreateUsuarioDTO } from "./dto/create-user.dto";
 
 import * as bcrypt from "bcrypt";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import { Role } from "./entities/role.entity";
+import { Connection, DataSource, DeepPartial, Repository } from "typeorm";
+import { Role } from "../departamentos/entities/role.entity";
 import { AuthService } from "./auth.service";
 import { handleDBErrors } from "src/common/helpers/db_errors";
+import { UpdateUsuarioDTO } from "./dto/update-user.dto";
 
 @Injectable()
 export class UsuariosService {
@@ -19,6 +20,8 @@ export class UsuariosService {
 
 		@InjectRepository(Role)
 		private readonly roleRepository:Repository<Role>,
+
+		private readonly dataSource:DataSource,
 
         private readonly authService:AuthService
     ){}
@@ -40,48 +43,7 @@ export class UsuariosService {
 		};
 	}
 
-	async createUser(createUserDTO: CreateUserDTO) {
-
-		const { roles,...userData } = createUserDTO;
-
-		//Verificar que todos los roles existan primero antes de registrar el usuario
-		for(const roleId of roles){
-			const roleDB = await this.roleRepository.findOneBy({id:roleId})
-			if(!roleDB) throw new BadRequestException(`El rol con id ${roleId} no existe,la creacion fue cancelada!`);
-		}
-
-		userData.password = bcrypt.hashSync(createUserDTO.password,10);
-
-		let user = this.userRepository.create({
-			...userData,
-			roles:[]
-		});
-
-		user = await this.userRepository.save(user);
-
-		for(const roleId of roles){
-
-			const roleDB = await this.roleRepository.findOneBy({id:roleId})
-
-			roleDB.usuarios.push(user);
-			await this.roleRepository.save(roleDB);
-
-			user.roles.push(roleDB);
-
-		}
-
-		user = await this.userRepository.save(user);
-		delete user.password;
-
-		return {
-			message:"Usuario creado con exito!",
-			user,
-            token:this.authService.generateJWT({correo:user.correo,id:user.id})
-		};
-
-  	}
-
-	async getUserById(id:string){
+	async findOneById(id:string){
 
 		const user = await this.userRepository.createQueryBuilder("user")
 		.leftJoinAndSelect("user.roles","roles")
@@ -95,8 +57,85 @@ export class UsuariosService {
 		return user;
 	}
 
-	async updateUserById(user:Usuario){
-		
+	async createUser(createUserDTO: CreateUsuarioDTO,usuarioCreador?:Usuario) {
+
+		const { roles,...userData } = createUserDTO;
+
+		const queryRunner = this.dataSource.createQueryRunner();
+		await queryRunner.connect();
+		await queryRunner.startTransaction();
+
+
+		userData.password = bcrypt.hashSync(createUserDTO.password,10);
+
+		let usuario = this.userRepository.create({
+			...userData,
+			usuarioCreador,
+			roles:[]
+		});
+
+		try {
+			for(const roleId of roles){
+				const roleDB = await this.roleRepository.findOneBy({id:roleId})
+				if(!roleDB) throw new Error(`No existe el rol con id ${roleId}`);
+				usuario.roles.push(roleDB);
+			}
+		} catch (error) {
+			await queryRunner.rollbackTransaction();
+			await queryRunner.release();
+			throw new BadRequestException(`${error}`);
+		}
+
+		usuario = await this.userRepository.save(usuario);
+		delete usuario.password;
+
+		await queryRunner.commitTransaction();
+		await queryRunner.release();
+
+		return {
+			message:"Usuario creado con exito!",
+			usuario,
+            token:this.authService.generateJWT({correo:usuario.correo,id:usuario.id})
+		};
+
+  	}
+
+
+
+	async updateUserById(id:string,updateUsuarioDTO:UpdateUsuarioDTO,user:Usuario){
+
+		//Verificamos primero que el usuario exista
+		await this.findOneById(id);
+
+		const queryRunner = this.dataSource.createQueryRunner();
+		await queryRunner.connect();
+		await queryRunner.startTransaction();
+
+		try {
+
+			await queryRunner.manager
+			.createQueryBuilder()
+			.update(Usuario)
+			.set(updateUsuarioDTO)
+			.where("id = :id",{id})
+			.execute();
+
+
+			await queryRunner.commitTransaction();
+
+			//Recupera el usuario actualizado
+			const usuarioActualizado = await this.findOneById(id);
+
+			return usuarioActualizado;
+
+
+		} catch (error) {
+			await queryRunner.rollbackTransaction();
+			throw error;
+		} finally{
+			await queryRunner.release();
+		}
+
 	}
 
 	async deleteAllUsers(){

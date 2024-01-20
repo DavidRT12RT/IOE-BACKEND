@@ -1,6 +1,6 @@
 import { IsArray, IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID, Matches, MaxLength, MinLength } from "class-validator";
 
-export class CreateUserDTO {
+export class CreateUsuarioDTO {
 
     @IsString({message:"el nombre debe ser un string"})
     @MinLength(1,{message:"El nombre de usuario es necesario!"})
@@ -26,6 +26,10 @@ export class CreateUserDTO {
         message:"El password tiene que tener mayusculas,minusculas y un numero"
     })
     password:string;
+
+    @IsString({message:"el telefono debe ser un string"})
+    telefono:string;
+
 
     @IsArray({message:"El array de roles es necesario!"})
     @IsUUID("4", { each: true, message: 'Cada elemento del array de roles debe ser un UUID válido' })

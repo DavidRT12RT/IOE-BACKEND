@@ -1,7 +1,7 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { PaginationDto } from "src/common/dtos/pagination.dto";
 import { CreateDepartmentDto } from "./dto/create-department";
-import { Usuario } from "./entities/usuario.entity";
+import { Usuario } from "../auth/entities/usuario.entity";
 import { handleDBErrors } from "src/common/helpers/db_errors";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Departamento } from "./entities/departamento.entity";
@@ -19,6 +19,29 @@ export class DepartamentosService {
 		@InjectRepository(Departamento)
 		private readonly departmentRepository:Repository<Departamento>,
     ){}
+
+	async findAllDepartamentos(
+		paginationDto:PaginationDto
+	){
+		return this.departmentRepository.createQueryBuilder("department")
+		.leftJoinAndSelect("department.roles","roles")
+		.skip(paginationDto.offset)
+		.limit(paginationDto.limit)
+		.getMany()
+	}
+
+	async findOneDepartamentoById(id:string){
+
+		const departamento = await this.departmentRepository.createQueryBuilder("departamento")
+		.leftJoinAndSelect("departamento.roles","roles")
+		.getOne();
+
+		if(!departamento) throw new NotFoundException(`Ningun departamento con ese id`);
+
+		return {
+			departamento
+		};
+	}
 
 	async createDepartment(createDepartmentDto:CreateDepartmentDto,user:Usuario){
 
@@ -56,14 +79,6 @@ export class DepartamentosService {
 		}
 	}
 
-	async findAllDepartments(
-		paginationDto:PaginationDto
-	){
-		return this.departmentRepository.createQueryBuilder("department")
-		.leftJoinAndSelect("department.roles","roles")
-		.skip(paginationDto.offset)
-		.limit(paginationDto.limit)
-		.getMany()
-	}
+
 
 };

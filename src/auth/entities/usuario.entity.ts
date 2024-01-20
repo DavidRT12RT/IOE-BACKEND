@@ -1,9 +1,10 @@
 import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
-import { Role } from "./role.entity";
-import { Departamento } from "./departamento.entity";
+import { Role } from "../../departamentos/entities/role.entity";
+import { Departamento } from "../../departamentos/entities/departamento.entity";
 import { Sucursal } from "src/sucursales/entities/sucursal.entity";
 import { Producto } from "src/productos/entities/producto.entity";
 import { Categoria } from "src/productos/entities/categoria.entity";
+import { Inventario } from "src/inventarios/entities/inventario.entity";
 
 @Entity()
 export class Usuario{
@@ -61,7 +62,6 @@ export class Usuario{
     )
     roles:Role[];
 
-
     @OneToMany(
         () => Role,
         (role) => role.creadoPorUsuario
@@ -91,6 +91,19 @@ export class Usuario{
         (categoria) => categoria.usuarioCreador
     )
     categoriasCreadas:Categoria[];
+
+    @OneToMany(
+        () => Inventario,
+        (inventario) => inventario.supervisor
+    )
+    inventarios:Inventario;
+
+    @ManyToOne(
+        () => Usuario,
+        (usuario) => usuario.id,
+        {nullable:true}
+    )
+    usuarioCreador:Usuario;
 
     //Triggers 
     @BeforeInsert()

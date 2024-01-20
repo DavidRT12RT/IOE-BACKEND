@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Put, Query } from "@nestjs/common";
 
 //DTO's
-import { CreateUserDTO } from "./dto/create-user.dto";
+import { CreateUsuarioDTO } from "./dto/create-user.dto";
 import { PaginationDto } from "src/common/dtos/pagination.dto";
 
 //Decorators
@@ -11,39 +11,45 @@ import { Auth, GetUser } from "./decorators";
 import { Usuario } from "./entities/usuario.entity";
 
 import { UsuariosService } from "./usuarios.service";
+import { UpdateUsuarioDTO } from "./dto/update-user.dto";
 
 @Controller("usuarios")
 export class UsuariosController {
 
     constructor(private readonly usuariosService:UsuariosService) {}
 
-    @Post("register/user")
-    createUser(@Body() createUserDTO: CreateUserDTO) {
-          return this.usuariosService.createUser(createUserDTO);
-    }
-
-    @Get("/users")
+    @Get()
     getAllUsers(
         @Query() paginationDto:PaginationDto
     ){
         return this.usuariosService.findAllUsers(paginationDto);
     }
 
-    @Get("/user/:id")
+    @Get("/:id")
     @Auth()
     getUsersById(
         @Param("id",ParseUUIDPipe) id:string
     ){
-        return this.usuariosService.getUserById(id);
+        return this.usuariosService.findOneById(id);
     }
 
-    @Put("/user/:id")
+    @Post()
     @Auth()
-    editUserById(
+    createUser(
+        @Body() createUserDTO: CreateUsuarioDTO,
+        @GetUser() user:Usuario
+    ) {
+          return this.usuariosService.createUser(createUserDTO,user);
+    }
+
+    @Put("/:id")
+    @Auth()
+    updateUserById(
         @Param("id",ParseUUIDPipe) id:string,
+        @Body() updateUsuarioDto:UpdateUsuarioDTO,
         @GetUser() user:Usuario,
     ){
-        return;
+        return this.usuariosService.updateUserById(id,updateUsuarioDto,user);
     }
 
 

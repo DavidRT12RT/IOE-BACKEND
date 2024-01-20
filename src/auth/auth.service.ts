@@ -4,23 +4,22 @@ import { Repository } from 'typeorm';
 
 //Entities
 import { Usuario } from './entities/usuario.entity';
-import { Departamento } from './entities/departamento.entity';
-import { Role } from './entities/role.entity';
+import { Departamento } from '../departamentos/entities/departamento.entity';
+import { Role } from '../departamentos/entities/role.entity';
 
 //DTO's
-import { CreateUserDTO } from './dto/create-user.dto';
+import { CreateUsuarioDTO } from './dto/create-user.dto';
 
 //Bcrypt
 import * as bcrypt from "bcrypt";
 
 //DTO's (Data Transfer Object)
 import { LoginUserDto } from './dto/login-user.dto';
-import { CreateRoleDTO } from './dto/create-role.dto';
+import { CreateRoleDTO } from '../departamentos/dto/create-role.dto';
 
 //JWT
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { JwtService } from '@nestjs/jwt';
-import { handleDBErrors } from 'src/common/helpers/db_errors';
 
 @Injectable()
 export class AuthService {
@@ -31,46 +30,9 @@ export class AuthService {
 		@InjectRepository(Usuario) 
 		private readonly userRepository:Repository<Usuario>,
 
-		@InjectRepository(Role)
-		private readonly roleRepository:Repository<Role>,
-
-		@InjectRepository(Departamento)
-		private readonly departmentRepository:Repository<Departamento>,
-
 		private readonly jwtService:JwtService // -> Proporcionado por el JWTMODULE Y LA EXPORTACION
 	){}
 
-	async createRole(createRoleDTO:CreateRoleDTO,user:Usuario){
-
-		try {
-
-			const { departamento,...roleData } = createRoleDTO;
-
-			//Primero buscamos el usuario si NO esta no creamos el departamento
-			const userDB = await this.userRepository.findOneBy({id:user.id});
-			if(!userDB) throw new BadRequestException("Ningun usuario fue encontrado por ese id!");
-
-			//buscamos el departmento si NO esta no creamos el role
-			const department = await this.departmentRepository.findOneBy({id:departamento});
-			if(!department) throw new BadRequestException("Ningun departamento fue encontrado por ese id!");
-
-			const role = this.roleRepository.create({
-				...roleData,
-				departamento:department,
-				creadoPorUsuario:user
-			});
-			await this.roleRepository.save(role);
-
-			return {
-				role,
-				message:"Rol creado!"
-			};
-
-		} catch (error) {
-			handleDBErrors(error);
-		}
-
-	}
 
 
 

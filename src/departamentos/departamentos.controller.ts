@@ -1,10 +1,10 @@
 import { Body, Controller, Get, Post, Query } from "@nestjs/common";
-import { AuthService } from "./auth.service";
+import { AuthService } from "../auth/auth.service";
 import { PaginationDto } from "src/common/dtos/pagination.dto";
 //Decorators
-import { Auth, GetUser } from "./decorators";
+import { Auth, GetUser } from "../auth/decorators";
 //Entities
-import { Usuario } from "./entities/usuario.entity";
+import { Usuario } from "../auth/entities/usuario.entity";
 
 //Dto's
 import { CreateDepartmentDto } from "./dto/create-department";
@@ -13,18 +13,18 @@ import { CreateDepartmentDto } from "./dto/create-department";
 import { DepartamentosService } from "./departamentos.service";
 
 @Controller("departamentos")
-export class DepartamentoController {
+export class DepartamentosController {
 
     constructor(private readonly departamentosService:DepartamentosService) {}
 
-    @Get("/departments")
+    @Get()
     getAllDepartments(
         @Query() paginationDto:PaginationDto
     ){
-        return this.departamentosService.findAllDepartments(paginationDto);
+        return this.departamentosService.findAllDepartamentos(paginationDto);
     }
 
-    @Post("register/department")
+    @Post()
     @Auth()
     createDepartment(
         @Body() createDepartmentDto:CreateDepartmentDto,
