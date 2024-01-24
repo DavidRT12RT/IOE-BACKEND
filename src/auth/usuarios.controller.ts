@@ -30,7 +30,7 @@ export class UsuariosController {
     getUsersById(
         @Param("id",ParseUUIDPipe) id:string
     ){
-        return this.usuariosService.findOneById(id);
+        return this.usuariosService.findOneUserById(id);
     }
 
     @Post()

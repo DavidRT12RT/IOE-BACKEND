@@ -5,7 +5,7 @@ import { CreateUsuarioDTO } from "./dto/create-user.dto";
 
 import * as bcrypt from "bcrypt";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Connection, DataSource, DeepPartial, Repository } from "typeorm";
+import { DataSource,Repository } from "typeorm";
 import { Role } from "../departamentos/entities/role.entity";
 import { AuthService } from "./auth.service";
 import { handleDBErrors } from "src/common/helpers/db_errors";
@@ -43,7 +43,7 @@ export class UsuariosService {
 		};
 	}
 
-	async findOneById(id:string){
+	async findOneUserById(id:string){
 
 		const user = await this.userRepository.createQueryBuilder("user")
 		.leftJoinAndSelect("user.roles","roles")
@@ -54,7 +54,7 @@ export class UsuariosService {
 
 		if(!user) throw new NotFoundException(`Ningun usuario por ese id ${id}`);
 
-		return user;
+		return {user};
 	}
 
 	async createUser(createUserDTO: CreateUsuarioDTO,usuarioCreador?:Usuario) {
@@ -104,30 +104,30 @@ export class UsuariosService {
 
 	async updateUserById(id:string,updateUsuarioDTO:UpdateUsuarioDTO,user:Usuario){
 
-		//Verificamos primero que el usuario exista
-		await this.findOneById(id);
 
 		const queryRunner = this.dataSource.createQueryRunner();
 		await queryRunner.connect();
 		await queryRunner.startTransaction();
 
 		try {
+			//Verificamos primero que el usuario exista
+			const { user } = await this.findOneUserById(id);
 
-			await queryRunner.manager
-			.createQueryBuilder()
-			.update(Usuario)
-			.set(updateUsuarioDTO)
-			.where("id = :id",{id})
-			.execute();
+			if(updateUsuarioDTO.roles){
+				//Actualizamos los roles si vienen
 
+				for(const roleID of updateUsuarioDTO.roles){
+					// const roleDB = this.role
+				}
 
+			}
+
+			await this.userRepository.save(user);
 			await queryRunner.commitTransaction();
 
-			//Recupera el usuario actualizado
-			const usuarioActualizado = await this.findOneById(id);
-
-			return usuarioActualizado;
-
+			return {
+				user
+			};
 
 		} catch (error) {
 			await queryRunner.rollbackTransaction();
@@ -147,6 +147,22 @@ export class UsuariosService {
 			handleDBErrors(error);
 		}
 	}
+
+	// async deleteUserByID(id:string){
+
+	// 	//Verificar que exista
+	// 	const usuario = await this.findOneUserById(id);
+	// 	usuario.activo = false;
+
+	// 	await this.userRepository.save(usuario);
+
+	// 	return {
+	// 		message:"Usuario desactivo con exito!"
+	// 	};
+
+
+	// }
+
 
 
 

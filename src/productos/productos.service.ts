@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { CreateProductoDto } from './dto/create-producto.dto';
 
 //Entities
@@ -12,6 +12,7 @@ import { CategoriasService } from './categorias.service';
 
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { AlmacenesService } from 'src/sucursales/almacenes.service';
+import { handleDBErrors } from 'src/common/helpers/db_errors';
 
 @Injectable()
 export class ProductosService {
@@ -37,7 +38,7 @@ export class ProductosService {
 			const { almacen } = await this.almacenService.findOneAlmacen(almacenID);
 
 			//Despues buscamos la categoria y comprobamos que exista
-			const { categoria } = await this.categoriasService.findOneCategoria(categoriaID);
+			const { categoria } = await this.categoriasService.findOneCategoriaById(categoriaID);
 			
 
 			const producto = this.productoRepository.create({
@@ -55,7 +56,7 @@ export class ProductosService {
 			};
 
 		} catch (error) {
-			this.handleDBErrors(error);
+			handleDBErrors(error);
 		}
 
   	}
@@ -81,13 +82,43 @@ export class ProductosService {
 
   	}
 
+  	async findOneProductoById(
+		id:string,
+	) {
 
-    private handleDBErrors(error:any):never{ //-> never jamas regresara algo
-        if(error.code === "23505") throw new BadRequestException(error.detail);
+		const producto = await this.productoRepository.createQueryBuilder("producto")
+		.leftJoinAndSelect("producto.almacen","almacen")
+		.leftJoinAndSelect("producto.categoria","categoria")
+		.where("producto.id = :id",{id})
+		.getOne()
+		
+		if(!producto) throw new NotFoundException(`El producto con id ${id} no existe!`);
 
-        this.logger.error(error);
+		return {
+			producto
+		}
 
-        throw new InternalServerErrorException("Please check server logs...");
-    }
+  	}
+
+	async findProductosByCategory(
+		categoriaID:string,
+		paginationDto?:PaginationDto
+	):Promise<{productos: Producto[]}>{
+
+		const productos =  await this.productoRepository.createQueryBuilder("productos")
+		.leftJoinAndSelect("productos.almacen","almacen")
+		.leftJoinAndSelect("productos.categoria","categoria")
+		.where("categoria.id =:categoriaID",{categoriaID})
+		// .skip(paginationDto.offset)
+		// .limit(paginationDto.limit)
+		.getMany();
+
+
+		return {
+			productos
+		}
+	}
+
+
 
 }

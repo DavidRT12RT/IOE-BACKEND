@@ -1,5 +1,7 @@
 import { Usuario } from "src/auth/entities/usuario.entity";
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Categoria } from "src/productos/entities/categoria.entity";
+import { BeforeInsert, Column, CreateDateColumn, Entity, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { InventarioDetalle } from "./inventario-detalle.entity";
 
 @Entity()
 export class Inventario {
@@ -16,14 +18,23 @@ export class Inventario {
 	@Column("float",{default:0})
     importe_ajustado:number;
 
-    @Column({type:"number",default:0})
+	@Column("float",{default:0})
+    cantidad_total_articulos_ajustados:number;
+
+    @Column({default:0})
     articulos_ajustados:number;
 
-    @Column({type:"number",default:0})
+    @Column({default:0})
     articulos_contados:number;
 
+    // @OneToOne(
+    //     () => Categoria,
+    //     (categoria) => categoria.id
+    // )
+    // jerarquia:Categoria;
+
     @Column()
-    jerarquia:string;
+    tipo_inventario:string;
 
     @CreateDateColumn()
     fecha_registro:Date;
@@ -36,6 +47,25 @@ export class Inventario {
         usuario => usuario.inventarios
     )
     supervisor:Usuario;
+
+    @OneToMany(
+        () => InventarioDetalle,
+        detalle => detalle.inventario,
+        {cascade:true}
+    )
+    detalles:InventarioDetalle[];
+
+    // @ManyToOne(
+    //     () => Categoria,
+    //     (categoria) => categoria.inventarios,
+    //     {nullable:true}
+    // )
+    // categoria:Categoria;
+
+    @BeforeInsert()
+    checkFields(){
+        this.nombre_inventario = this.nombre_inventario.toUpperCase();
+    }
 
 
 };

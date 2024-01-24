@@ -28,7 +28,6 @@ import { DepartamentosModule } from './departamentos/departamentos.module';
 		ProductosModule,
 		InventariosModule,
 		DepartamentosModule,
-		// StoreModule,
 	],
 })
 export class AppModule {

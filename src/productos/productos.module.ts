@@ -10,18 +10,17 @@ import { Producto } from './entities/producto.entity';
 import { Categoria } from './entities/categoria.entity';
 import { CategoriasController } from './categorias.controller';
 import { CategoriasService } from './categorias.service';
+import { InventariosModule } from 'src/inventarios/inventarios.module';
 
 @Module({
 	imports:[
 		AuthModule,
+		// InventariosModule,
 		SucursalModule,
 		TypeOrmModule.forFeature([
 			Producto,
 			Categoria
 		]),
-	],
-	exports:[
-		TypeOrmModule
 	],
   	controllers: [
 		ProductosController,
@@ -31,6 +30,10 @@ import { CategoriasService } from './categorias.service';
 		ProductosService,
 		CategoriasService
 	],
-
+	exports:[
+		ProductosService,
+		CategoriasService,
+		TypeOrmModule
+	],
 })
 export class ProductosModule {}

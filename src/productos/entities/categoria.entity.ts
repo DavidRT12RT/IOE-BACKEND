@@ -3,6 +3,7 @@ import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGenerate
 
 import { Producto } from "./producto.entity";
 import { Usuario } from "src/auth/entities/usuario.entity";
+import { Inventario } from "src/inventarios/entities/inventario.entity";
 
 @Entity()
 export class Categoria{
@@ -28,6 +29,13 @@ export class Categoria{
         (producto) => producto.categoria
     )
     productos:Producto[];
+
+    // @OneToMany(
+    //     () => Inventario,
+    //     (inventario) => inventario.categoria,
+    //     {nullable:true}
+    // )
+    // inventarios:Inventario[];
 
 	@ManyToOne(
 		() => Usuario,

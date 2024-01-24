@@ -1,7 +1,9 @@
 import { Usuario } from "src/auth/entities/usuario.entity";
 import { Almacen } from "src/sucursales/entities/almacen.entity";
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Categoria } from "./categoria.entity";
+import { InventarioDetalle } from "src/inventarios/entities/inventario-detalle.entity";
+import { Inventario } from "src/inventarios/entities/inventario.entity";
 
 @Entity()
 export class Producto {
@@ -14,6 +16,19 @@ export class Producto {
 
 	@Column()
 	descripcion:string;
+
+	@Column("text",{
+		array:true,
+		default:[],
+		nullable:false
+	})
+	usos:string[];
+
+	@Column({nullable:true})
+	material:string;
+
+	@Column({nullable:true})
+	color:string;
 
 	@Column("float")
 	stock:number;
@@ -48,5 +63,29 @@ export class Producto {
 		(categoria) => categoria.productos
 	)
 	categoria:Categoria;
+
+	@OneToMany(
+		() => InventarioDetalle,
+		(detalle) => detalle.producto
+	)
+	detalles:InventarioDetalle[];
+
+
+
+	@ManyToOne(
+		() => Producto,
+		producto => producto.modelos_secundarios,
+		{nullable:true}
+
+	)
+	modelo_base?:Producto;
+
+	@OneToMany(
+		() => Producto,
+		producto => producto.modelo_base,
+		{nullable:true}
+	)
+	modelos_secundarios?:Producto[];
+
 
 }

@@ -58,7 +58,7 @@ export class CategoriasService{
 
   	}
 	
-	async findOneCategoria(id:string){
+	async findOneCategoriaById(id:string){
 
 		const categoria = await this.categoriaRepository.createQueryBuilder("categoria")
 		.where("categoria.id = :id",{id})

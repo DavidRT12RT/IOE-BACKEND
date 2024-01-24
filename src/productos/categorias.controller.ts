@@ -20,7 +20,16 @@ export class CategoriasController{
         private readonly categoriasService:CategoriasService
     ){}
 
-	@Post("categorias")
+	@Get()
+	// @Auth()
+	findAllCategorias(
+		@Query() paginationDto:PaginationDto
+	){
+
+		return this.categoriasService.findAllCategorias(paginationDto);
+	}
+
+	@Post()
 	@Auth()
 	createCategoria(
 		@Body() createCategoriaDto:CreateCategoriaDto,
@@ -30,13 +39,5 @@ export class CategoriasController{
 		return this.categoriasService.createCategoria(createCategoriaDto,user);
 	}
 
-	@Get("categorias")
-	@Auth()
-	findAllCategorias(
-		@Query() paginationDto:PaginationDto
-	){
-
-		return this.categoriasService.findAllCategorias(paginationDto);
-	}
 
 };

@@ -12,16 +12,15 @@ export class AlmacenesController {
 		private readonly almacenesService:AlmacenesService
 	){}
 
-
-	@Get("almacen")
-	@Auth()
+	@Get()
+	// @Auth()
 	getAllAlmacen(
 		@Query() paginationDto:PaginationDto
 	){
 		return this.almacenesService.findAllAlmacenes(paginationDto);
 	}
 
-	@Post("almacen")
+	@Post()
 	@Auth()
 	createWarehouse(
 		@Body() createAlmacenDto: CreateAlmacenDto,
