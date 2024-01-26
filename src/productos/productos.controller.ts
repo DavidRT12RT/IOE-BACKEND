@@ -22,7 +22,7 @@ export class ProductosController {
   	}
 
   	@Get()
-	@Auth()
+	// @Auth()
   	findAllProductos(
 		@Query() paginationDto:PaginationDto
 	) {
