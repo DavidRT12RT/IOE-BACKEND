@@ -13,7 +13,7 @@ export class InventariosController {
  	constructor(private readonly inventariosService: InventariosService) {}
 
   	@Get()
-	@Auth()
+	// @Auth()
   	findAll(
 		@Query() paginationDto:PaginationDto
 	) {
@@ -21,7 +21,7 @@ export class InventariosController {
   	}
 
 	@Get("/:id")
-	@Auth()
+	// @Auth()
 	findOne(
 		@Param("id",ParseUUIDPipe) id:string
 	){

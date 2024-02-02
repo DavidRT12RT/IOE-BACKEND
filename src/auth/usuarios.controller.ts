@@ -20,9 +20,11 @@ export class UsuariosController {
 
     @Get()
     getAllUsers(
-        @Query() paginationDto:PaginationDto
+        @Query() paginationDto:PaginationDto,
+        @Query("rol") rol:string | string[] = ""
+
     ){
-        return this.usuariosService.findAllUsers(paginationDto);
+        return this.usuariosService.findAllUsers(paginationDto,rol);
     }
 
     @Get("/:id")

@@ -55,6 +55,7 @@ export class InventariosService {
         const inventario = await this.inventarioRepository.createQueryBuilder("inventario")
         .leftJoinAndSelect("inventario.detalles","detalles")
         .leftJoinAndSelect("detalles.producto","producto")
+        .leftJoinAndSelect("producto.categoria","categoria")
         .leftJoinAndSelect("inventario.supervisor","supervisor")
         .where("inventario.id = :id",{id})
         .getOne();

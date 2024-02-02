@@ -13,4 +13,7 @@ export class PaginationDto {
     @Min(0)
     @Type(() => Number) // enableImplicitConversions:true
     offset?:number = 0;
+
+    @IsOptional()
+    rol:string;
 };

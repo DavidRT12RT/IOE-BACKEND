@@ -27,19 +27,27 @@ export class UsuariosService {
     ){}
 
 	async findAllUsers(
-		paginationDto:PaginationDto
+		paginationDto:PaginationDto,
+		roles?:string | string[]
 	){
-		const users = await this.userRepository.createQueryBuilder("user")
+		const query = await this.userRepository.createQueryBuilder("user")
 		.leftJoinAndSelect("user.roles","roles")
 		.leftJoinAndSelect("roles.departamento","departamento")
 		.leftJoinAndSelect("user.supervisor","supervisor")
 		.leftJoinAndSelect("user.personal","personal")
-		.skip(paginationDto.offset)
-		.take(paginationDto.limit)
-		.getMany()
+
+		if(roles) {
+			const rolesArray = Array.isArray(roles) ? roles : [roles];
+			query.andWhere("roles.nombre IN (:...roles)",{roles:rolesArray});
+		}
+
+		const usuarios = await query
+			.skip(paginationDto.offset)
+			.limit(paginationDto.limit)
+			.getMany();
 
 		return {
-			users
+			usuarios
 		};
 	}
 

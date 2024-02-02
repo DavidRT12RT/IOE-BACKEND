@@ -12,6 +12,12 @@ export class Inventario {
     @Column()
     nombre_inventario:string;
 
+    @Column({nullable:true})
+    descripcion:string;
+
+    @Column("text",{array:true,default:[]})
+    observaciones:string[];
+
     @Column({type:"bool",default:true})
     estatus:boolean;
 

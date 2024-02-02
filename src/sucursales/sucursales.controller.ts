@@ -28,7 +28,7 @@ export class SucursalController {
   	}
 
 	@Get()
-	@Auth()
+	// @Auth()
 	getAllSucursales(
 		@Query() paginationDto:PaginationDto
 	){
