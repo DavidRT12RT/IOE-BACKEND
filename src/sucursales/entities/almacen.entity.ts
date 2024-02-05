@@ -1,6 +1,7 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Sucursal } from "./sucursal.entity";
 import { Producto } from "src/productos/entities/producto.entity";
+import { ProductoAlmacen } from "src/productos/entities/producto-almacen.entity";
 
 @Entity()
 export class Almacen{
@@ -17,16 +18,6 @@ export class Almacen{
     @Column()
     tipo_almacen:string;
 
-    // @ManyToOne(
-    //     () => User,
-    //     (user) => user.almacenes,
-    //     {
-    //         nullable:true
-    //     }
-    // )
-    // responsable:User;
-
-
     @CreateDateColumn()
     fecha_registro:Date;
 
@@ -41,9 +32,9 @@ export class Almacen{
     sucursal:Almacen;
 
     @OneToMany(
-        () => Producto,
-        (producto) => producto.almacen
+        () => ProductoAlmacen,
+        (productoAlmacen) => productoAlmacen.almacen
     )
-    productos:Producto[];
+	productosAlmacen:ProductoAlmacen[];
 
 };

@@ -32,21 +32,23 @@ export class ProductosService {
 
 		try {
 			
-			const { categoria:categoriaID,almacen:almacenID,...productoDtoData } = createProductoDto;
-
-			//Primero buscamos el almacen y comprobamos que exista
-			const { almacen } = await this.almacenService.findOneAlmacen(almacenID);
+			const { categoria:categoriaID,almacenes,...productoDtoData} = createProductoDto;
 
 			//Despues buscamos la categoria y comprobamos que exista
 			const { categoria } = await this.categoriasService.findOneCategoriaById(categoriaID);
-			
 
 			const producto = this.productoRepository.create({
 				...productoDtoData,
 				usuarioCreador:user,
-				almacen,
 				categoria
 			});
+
+			if(almacenes.length >= 1){
+				//Insertar el producto en cada uno de los almacenes
+				for(const almacen of almacenes){
+					const almacen = await this.almacenService.findOneAlmacenById();
+				}
+			}
 
 			await this.productoRepository.save(producto);
 

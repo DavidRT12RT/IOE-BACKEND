@@ -35,7 +35,7 @@ export class SucursalService {
 			await this.sucursalRepository.save(sucursal);
 
 			return {
-				store: sucursal,
+				sucursal,
 				message:"Sucursal creada con exito!"
 			};
 
@@ -54,6 +54,7 @@ export class SucursalService {
 
 		const sucursales = await this.sucursalRepository.createQueryBuilder("sucursal")
 		.leftJoinAndSelect("sucursal.almacenes","almacenes")
+		.leftJoinAndSelect("almacenes.productos","productos")
 		.skip(offset)
 		.limit(limit)
 		.getMany();

@@ -4,6 +4,7 @@ import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGenerate
 import { Categoria } from "./categoria.entity";
 import { InventarioDetalle } from "src/inventarios/entities/inventario-detalle.entity";
 import { Inventario } from "src/inventarios/entities/inventario.entity";
+import { ProductoAlmacen } from "./producto-almacen.entity";
 
 @Entity()
 export class Producto {
@@ -52,11 +53,11 @@ export class Producto {
 	)
 	usuarioCreador:Usuario;
 
-	@ManyToOne(
-		() => Almacen,
-		(almacen) => almacen.productos
+	@OneToMany(
+		() => ProductoAlmacen,
+		(productoAlmacen) => productoAlmacen.producto
 	)
-	almacen:Almacen;
+	productosAlmacen:ProductoAlmacen[];
 
 	@ManyToOne(
 		() => Categoria,
@@ -69,7 +70,6 @@ export class Producto {
 		(detalle) => detalle.producto
 	)
 	detalles:InventarioDetalle[];
-
 
 
 	@ManyToOne(
@@ -86,6 +86,13 @@ export class Producto {
 		{nullable:true}
 	)
 	modelos_secundarios?:Producto[];
+
+	//Metodo para calcular el stock total
+	getStockTotal():number{
+		return this.productosAlmacen.reduce(
+			(total,productoAlmacen) => total + productoAlmacen.stock,0
+		);
+	}
 
 
 }

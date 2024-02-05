@@ -11,6 +11,7 @@ import { Categoria } from './entities/categoria.entity';
 import { CategoriasController } from './categorias.controller';
 import { CategoriasService } from './categorias.service';
 import { InventariosModule } from 'src/inventarios/inventarios.module';
+import { ProductoAlmacen } from './entities/producto-almacen.entity';
 
 @Module({
 	imports:[
@@ -19,7 +20,8 @@ import { InventariosModule } from 'src/inventarios/inventarios.module';
 		SucursalModule,
 		TypeOrmModule.forFeature([
 			Producto,
-			Categoria
+			Categoria,
+			ProductoAlmacen
 		]),
 	],
   	controllers: [

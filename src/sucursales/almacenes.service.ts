@@ -23,7 +23,7 @@ export class AlmacenesService {
 		const { sucursal:sucursalId,...almacenData } = createAlmacenDto;
 
 		//Checar si existe primero la store (sucursal)
-        const sucursal = await this.sucursalService.findOneById(sucursalId);
+        const { sucursal } = await this.sucursalService.findOneById(sucursalId);
 
 		const almacen = this.almacenRepository.create({
 			...almacenData,
@@ -47,6 +47,7 @@ export class AlmacenesService {
 
 		const almacenes = await this.almacenRepository.createQueryBuilder("almacen")
 		.leftJoinAndSelect("almacen.productos","productos")
+		.leftJoinAndSelect("almacen.sucursal","sucursal")
 		.skip(offset)
 		.limit(limit)
 		.getMany();
@@ -58,7 +59,7 @@ export class AlmacenesService {
 
 	}
 
-  	async findOneAlmacen(
+  	async findOneAlmacenById(
 		id: string
 	) {
 		const almacen = await this.almacenRepository.createQueryBuilder("almacen")

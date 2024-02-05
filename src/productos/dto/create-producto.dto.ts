@@ -1,5 +1,5 @@
 import { Transform } from "class-transformer";
-import { IsInt, IsString, IsUUID, Min } from "class-validator";
+import { IsInt, IsOptional, IsString, IsUUID, Min } from "class-validator";
 
 export class CreateProductoDto {
 
@@ -24,11 +24,11 @@ export class CreateProductoDto {
 	@Transform(({value}) => parseInt(value))
 	costo_promedio:number;
 
-    @IsUUID("4",{message:"El almacen debe ser un UUID valido!"})
-    almacen:string;
-
     @IsUUID("4",{message:"La categoria debe ser un UUID valido!"})
     categoria:string;
+
+	@IsOptional()
+	almacenes:string[];
 
 };
 

@@ -26,7 +26,6 @@ export class AlmacenesController {
 		@Body() createAlmacenDto: CreateAlmacenDto,
 		@GetUser() user:Usuario
 	){
-
 		return this.almacenesService.createAlmacen(createAlmacenDto,user);
 	}
 
