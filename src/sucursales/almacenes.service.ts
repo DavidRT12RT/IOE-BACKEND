@@ -46,8 +46,9 @@ export class AlmacenesService {
 		const { limit = 10, offset = 0 } = paginationDto;
 
 		const almacenes = await this.almacenRepository.createQueryBuilder("almacen")
-		.leftJoinAndSelect("almacen.productos","productos")
 		.leftJoinAndSelect("almacen.sucursal","sucursal")
+		.leftJoinAndSelect("almacen.productosAlmacen","productosAlmacen")
+		.leftJoinAndSelect("productosAlmacen.producto","producto")
 		.skip(offset)
 		.limit(limit)
 		.getMany();

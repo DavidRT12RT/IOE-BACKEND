@@ -1,17 +1,20 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Put, Query } from "@nestjs/common";
 
 //DTO's
-import { CreateUsuarioDTO } from "./dto/create-user.dto";
 import { PaginationDto } from "src/common/dtos/pagination.dto";
+import { CreateUsuarioDTO } from "../dto/create-user.dto";
+import { UpdateUsuarioDTO } from "../dto/update-user.dto";
+
+//Servicie's
+import { UsuariosService } from "../services/usuarios.service";
+
+//Entitie's
+import { Usuario } from "../entities/usuario.entity";
 
 //Decorators
-import { Auth, GetUser } from "./decorators";
+import { Auth, GetUser } from "../decorators";
 
 //Entities
-import { Usuario } from "./entities/usuario.entity";
-
-import { UsuariosService } from "./usuarios.service";
-import { UpdateUsuarioDTO } from "./dto/update-user.dto";
 
 @Controller("usuarios")
 export class UsuariosController {
@@ -51,7 +54,7 @@ export class UsuariosController {
         @Body() updateUsuarioDto:UpdateUsuarioDTO,
         @GetUser() user:Usuario,
     ){
-        return this.usuariosService.updateUserById(id,updateUsuarioDto,user);
+        return this.usuariosService.updateUser(id,updateUsuarioDto,user);
     }
 
 

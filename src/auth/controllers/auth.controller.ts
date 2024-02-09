@@ -1,10 +1,8 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, BadRequestException, Logger, InternalServerErrorException, UseGuards, Req, Headers, SetMetadata, Query, ParseUUIDPipe, Put } from '@nestjs/common';
-import { AuthService } from './auth.service';
-
-// import { ValidRoles } from './interfaces';
+import { AuthService } from '../services/auth.service';
 
 //Dto's
-import { LoginUserDto } from './dto/login-user.dto';
+import { LoginUserDto } from '../dto/login-user.dto';
 
 @Controller('auth')
 export class AuthController {

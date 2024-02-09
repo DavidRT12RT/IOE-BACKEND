@@ -6,17 +6,19 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Inventario } from './entities/inventario.entity';
 import { InventarioDetalle } from './entities/inventario-detalle.entity';
 import { AuthModule } from 'src/auth/auth.module';
+import { SucursalModule } from 'src/sucursales/sucursales.module';
 
 @Module({
 	controllers: [InventariosController],
   	providers: [InventariosService],
 	imports:[
-		AuthModule,
+		SucursalModule,
 		ProductosModule,
+		AuthModule,
 		TypeOrmModule.forFeature([
 			Inventario,
 			InventarioDetalle
-		])
+		]),
 	],
 	exports:[
 		TypeOrmModule

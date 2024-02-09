@@ -1,10 +1,14 @@
-import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
-import { Role } from "../../departamentos/entities/role.entity";
-import { Departamento } from "../../departamentos/entities/departamento.entity";
+import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+
+
+//Entities
+import { Role } from "./role.entity";
+import { Departamento } from "./departamento.entity";
 import { Sucursal } from "src/sucursales/entities/sucursal.entity";
 import { Producto } from "src/productos/entities/producto.entity";
 import { Categoria } from "src/productos/entities/categoria.entity";
 import { Inventario } from "src/inventarios/entities/inventario.entity";
+import { UsuarioRoles } from "./usuario-roles.entity";
 
 @Entity()
 export class Usuario{
@@ -56,11 +60,11 @@ export class Usuario{
     )
     personal?:Usuario[];
 
-    @ManyToMany(
-        () => Role,
-        role => role.usuarios,
+    @OneToMany(
+        () => UsuarioRoles,
+        (usuarioRoles) => usuarioRoles.usuario
     )
-    roles:Role[];
+    usuarioRoles:UsuarioRoles[];
 
     @OneToMany(
         () => Role,

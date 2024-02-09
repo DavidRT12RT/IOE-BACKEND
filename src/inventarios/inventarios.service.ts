@@ -8,10 +8,11 @@ import { Usuario } from 'src/auth/entities/usuario.entity';
 import { ProductosService } from 'src/productos/productos.service';
 import { InventarioDetalle } from './entities/inventario-detalle.entity';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
-import { UsuariosService } from 'src/auth/usuarios.service';
 import { Producto } from 'src/productos/entities/producto.entity';
 import { CategoriasService } from 'src/productos/categorias.service';
 import { UpdateInventarioDetalleDto } from './dto/update-inventario-detalle.dto';
+import { UsuariosService } from 'src/auth/services/usuarios.service';
+import { SucursalService } from 'src/sucursales/sucursales.service';
 
 @Injectable()
 export class InventariosService {
@@ -23,9 +24,14 @@ export class InventariosService {
         @InjectRepository(InventarioDetalle)
         private readonly inventarioDetalleRepository:Repository<InventarioDetalle>,
 
+        @InjectRepository(Producto)
+        private readonly productoRepository:Repository<Producto>,
+
         private readonly usuariosService:UsuariosService,
 
         private readonly productosService:ProductosService,
+
+        private readonly sucursalService:SucursalService,
 
 		private readonly dataSource:DataSource,
     ){}
@@ -74,19 +80,29 @@ export class InventariosService {
 		await queryRunner.connect();
 		await queryRunner.startTransaction();
 
-        const inventario = this.inventarioRepository.create({
-            ...createInventarioDto,
-            supervisor:user
-        });
-
-
         try {
+
+            const { sucursal:sucursalId } = createInventarioDto;
+            const { sucursal } = await this.sucursalService.findOneById(sucursalId);
+
+            const inventario = this.inventarioRepository.create({
+                ...createInventarioDto,
+                supervisor:user,
+                sucursal,
+                almacenes:sucursal.almacenes
+            });
 
             let productos = [];
             switch (createInventarioDto.tipo_inventario) {
                 case "categoria":
                     //Cargar todo los productos del inventario en la otra tabla inventario-detalle
-                    const { productos:productosDB } = await this.productosService.findProductosByCategory(createInventarioDto.categoria);
+                    const productosDB = await this.productoRepository.createQueryBuilder("producto")
+                    .leftJoinAndSelect("producto.productosAlmacen","productosAlmacen")
+                    .leftJoinAndSelect("productosAlmacen.almacen","almacen")
+                    .leftJoinAndSelect("almacen.sucursal","sucursal")
+                    .leftJoinAndSelect("producto.categoria","categoria")
+                    .getMany();
+
                     productos = productosDB;
                     break;
 
@@ -145,7 +161,7 @@ export class InventariosService {
             
             //Actualizamos el supervisor del inventario
             if(updateInventarioDto.supervisor){
-                const { user:supervisor } = await this.usuariosService.findOneUserById(updateInventarioDto.supervisor);
+                const { usuario:supervisor } = await this.usuariosService.findOneUserById(updateInventarioDto.supervisor);
                 inventario.supervisor  = supervisor;
             }
 

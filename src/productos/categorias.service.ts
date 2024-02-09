@@ -46,8 +46,6 @@ export class CategoriasService{
 
 		const categorias = await this.categoriaRepository.createQueryBuilder("categoria")
 		.leftJoinAndSelect("categoria.productos","productos")
-		.leftJoinAndSelect("productos.almacen","almacen")
-		.leftJoinAndSelect("almacen.sucursal","sucursal")
 		.skip(offset)
 		.limit(limit)
 		.getMany()

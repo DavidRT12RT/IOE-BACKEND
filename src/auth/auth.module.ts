@@ -1,14 +1,5 @@
 import { Module } from '@nestjs/common';
 
-//Controller's
-import { UsuariosController } from './usuarios.controller';
-import { AuthController } from './auth.controller';
-
-//Services's
-import { UsuariosService } from './usuarios.service';
-import { DepartamentosService } from '../departamentos/departamentos.service';
-import { AuthService } from './auth.service';
-
 //Authentication
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
@@ -17,24 +8,46 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 
 //Entities
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Role } from '../departamentos/entities/role.entity';
 import { Usuario } from './entities/usuario.entity';
-import { Departamento } from '../departamentos/entities/departamento.entity';
+import { Role } from './entities/role.entity';
+import { UsuarioRoles } from './entities/usuario-roles.entity';
+
+//Controller's
+import { AuthController } from './controllers/auth.controller';
+import { UsuariosController } from './controllers/usuarios.controller';
+import { RolesController } from './controllers/roles.controller';
+import { DepartamentosController } from './controllers/departamentos.controller';
+
+//Servicie's
+import { AuthService } from './services/auth.service';
+import { UsuariosService } from './services/usuarios.service';
+import { Departamento } from './entities/departamento.entity';
+import { DepartamentosService } from './services/departamentos.service';
+import { RolesService } from './services/roles.service';
 
 
 @Module({
   	controllers: [
 		AuthController,
 		UsuariosController,
+		RolesController,
+		DepartamentosController
 	],
   	providers: [
 		AuthService,
+		DepartamentosService,
+		RolesService,
 		UsuariosService,
 		JwtStrategy
 	],
 	imports:[
 		ConfigModule,
-		TypeOrmModule.forFeature([Usuario,Role,Departamento]),
+		TypeOrmModule.forFeature([
+			Usuario,
+			Role,
+			Departamento,
+			UsuarioRoles,
+		]),
 		PassportModule.register({defaultStrategy:"jwt"}),
 		JwtModule.registerAsync({
 			imports:[ ConfigModule ],
@@ -43,7 +56,7 @@ import { Departamento } from '../departamentos/entities/departamento.entity';
 			useFactory:(configService:ConfigService) => ({
 				secret:configService.get("JWT_SECRET"),
 				signOptions:{
-					expiresIn:"1 days"
+					expiresIn:"2 days"
 				}
 			})
 		})
@@ -51,6 +64,8 @@ import { Departamento } from '../departamentos/entities/departamento.entity';
 	exports:[
 		AuthService,
 		UsuariosService,
+		DepartamentosService,
+		RolesService,
 		TypeOrmModule,
 		JwtStrategy,
 		PassportModule,

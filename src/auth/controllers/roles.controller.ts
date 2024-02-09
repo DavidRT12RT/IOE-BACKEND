@@ -1,10 +1,18 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query } from "@nestjs/common";
-import { Auth, GetUser } from "src/auth/decorators";
-import { PaginationDto } from "src/common/dtos/pagination.dto";
-import { RolesService } from "./roles.service";
+
+//Entitie's
 import { Usuario } from "src/auth/entities/usuario.entity";
-import { CreateRoleDTO } from "./dto/create-role.dto";
-import { ValidRoles } from "src/auth/interfaces";
+
+//Dto's
+import { CreateRoleDTO } from "../dto/create-role.dto";
+import { PaginationDto } from "src/common/dtos/pagination.dto";
+import { ValidRoles } from "../interfaces";
+
+//Service's
+import { RolesService } from "../services/roles.service";
+
+//Decorator's
+import { Auth, GetUser } from "src/auth/decorators";
 
 @Controller("roles")
 export class RolesController{
@@ -13,7 +21,7 @@ export class RolesController{
         private readonly rolesService:RolesService
     ){}
 
-    @Get("roles")
+    @Get()
     @Auth()
     getRoles(
         @Query() paginationDto:PaginationDto,
@@ -22,16 +30,16 @@ export class RolesController{
         return this.rolesService.findAllRoles(paginationDto);
     }
 
-    @Get("roles/:id")
+    @Get("/:id")
     @Auth()
     getRole(
         @Param("id",ParseUUIDPipe) id:string
     ){
-        return this.rolesService.findOneRole(id);
+        return this.rolesService.findOneRoleById(id);
     }
 
 
-    @Post("registrar/role")
+    @Post()
     @Auth(ValidRoles.admin)
     createRole(
         @Body() createRoleDTO:CreateRoleDTO,

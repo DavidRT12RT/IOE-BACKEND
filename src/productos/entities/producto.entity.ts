@@ -1,13 +1,12 @@
 import { Usuario } from "src/auth/entities/usuario.entity";
-import { Almacen } from "src/sucursales/entities/almacen.entity";
-import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, Repository, UpdateDateColumn } from "typeorm";
 import { Categoria } from "./categoria.entity";
 import { InventarioDetalle } from "src/inventarios/entities/inventario-detalle.entity";
-import { Inventario } from "src/inventarios/entities/inventario.entity";
 import { ProductoAlmacen } from "./producto-almacen.entity";
 
 @Entity()
 export class Producto {
+
 
 	@PrimaryGeneratedColumn("uuid")
 	id:string;
@@ -31,7 +30,10 @@ export class Producto {
 	@Column({nullable:true})
 	color:string;
 
-	@Column("float")
+	@Column("boolean",{default:true})
+	inventariable:boolean;
+
+	@Column("float",{default:1})
 	stock:number;
 
 	@Column("float")
@@ -55,7 +57,7 @@ export class Producto {
 
 	@OneToMany(
 		() => ProductoAlmacen,
-		(productoAlmacen) => productoAlmacen.producto
+		(productoAlmacen) => productoAlmacen.producto,
 	)
 	productosAlmacen:ProductoAlmacen[];
 
@@ -87,12 +89,11 @@ export class Producto {
 	)
 	modelos_secundarios?:Producto[];
 
-	//Metodo para calcular el stock total
-	getStockTotal():number{
-		return this.productosAlmacen.reduce(
-			(total,productoAlmacen) => total + productoAlmacen.stock,0
-		);
-	}
-
+	// Método para calcular el stock total
+  	getStockTotal(): number {
+		console.log("Entramos a calcular esto");
+      	// return this.productosAlmacen.reduce((total, productoAlmacen) => total + productoAlmacen.stock,0);
+		return 20;
+  	}
 
 }

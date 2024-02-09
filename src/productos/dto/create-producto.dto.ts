@@ -1,5 +1,6 @@
-import { Transform } from "class-transformer";
-import { IsInt, IsOptional, IsString, IsUUID, Min } from "class-validator";
+import { Transform, Type } from "class-transformer";
+import { ArrayNotEmpty, IsArray, IsBoolean, IsInt, IsOptional, IsString, IsUUID, Min, ValidateNested } from "class-validator";
+import { CreateProductoAlmacenDto } from "./create-producto-almacen.dto";
 
 export class CreateProductoDto {
 
@@ -8,11 +9,6 @@ export class CreateProductoDto {
 
 	@IsString()
 	descripcion:string;
-
-	@IsInt()
-	@Min(1)
-	@Transform(({value}) => parseInt(value))
-	stock:number;
 
 	@IsInt()
 	@Min(1)
@@ -28,7 +24,22 @@ export class CreateProductoDto {
     categoria:string;
 
 	@IsOptional()
-	almacenes:string[];
+	@IsString()
+	material:string;
+
+	@IsOptional()
+	@IsString()
+	color:string;
+
+	@IsOptional()
+	@IsBoolean()
+	inventariable:boolean;
+
+	@IsArray()
+	@ArrayNotEmpty()
+	@ValidateNested({each:true})
+	@Type(() => CreateProductoAlmacenDto)
+	almacenes:CreateProductoAlmacenDto[];
 
 };
 

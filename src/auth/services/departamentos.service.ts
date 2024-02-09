@@ -1,21 +1,23 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { PaginationDto } from "src/common/dtos/pagination.dto";
-import { CreateDepartmentDto } from "./dto/create-department";
-import { Usuario } from "../auth/entities/usuario.entity";
+import { Injectable, NotFoundException } from "@nestjs/common";
+
+//helpers
 import { handleDBErrors } from "src/common/helpers/db_errors";
+
+//Dto's
+import { CreateDepartmentDto } from "../dto/create-department";
+
+//Entities
+import { PaginationDto } from "src/common/dtos/pagination.dto";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Departamento } from "./entities/departamento.entity";
-import { Role } from "./entities/role.entity";
 import { Repository } from "typeorm";
+import { Departamento } from "../entities/departamento.entity";
+import { Usuario } from "../entities/usuario.entity";
 
 @Injectable()
 export class DepartamentosService {
 
 
     constructor(
-		@InjectRepository(Usuario) 
-		private readonly userRepository:Repository<Usuario>,
-
 		@InjectRepository(Departamento)
 		private readonly departmentRepository:Repository<Departamento>,
     ){}
@@ -47,14 +49,9 @@ export class DepartamentosService {
 
 		try {
 
-			//Primero buscamos el usuario si NO esta no creamos el departamento
-			const userDB = await this.userRepository.findOneBy({id:user.id});
-
-			if(!userDB) throw new BadRequestException("Ningun usuario fue encontrado por ese id!");
-
 			const departamento = this.departmentRepository.create({
 				...createDepartmentDto,
-				creadoPorUsuario:userDB
+				creadoPorUsuario:user
 			});
 
 			await this.departmentRepository.save(departamento);

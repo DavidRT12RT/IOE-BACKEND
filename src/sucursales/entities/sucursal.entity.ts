@@ -1,6 +1,7 @@
 import { Usuario } from "src/auth/entities/usuario.entity";
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Almacen } from './almacen.entity';
+import { Inventario } from "src/inventarios/entities/inventario.entity";
 
 @Entity()
 export class Sucursal {
@@ -17,6 +18,18 @@ export class Sucursal {
     @Column()
     calle:string;
 
+    @CreateDateColumn()
+    fecha_registro:Date;
+
+    @UpdateDateColumn()
+    fecha_actualizacion:Date;
+
+    @OneToMany(
+        () => Inventario,
+        inventario => inventario.sucursal
+    )
+    inventarios:Inventario[];
+
     @ManyToOne(
         () => Usuario,
         (usuario) => usuario.sucursalesCreadas
@@ -29,10 +42,5 @@ export class Sucursal {
     )
     almacenes:Almacen[];
 
-    @CreateDateColumn()
-    fecha_registro:Date;
-
-    @UpdateDateColumn()
-    fecha_actualizacion:Date;
 
 };

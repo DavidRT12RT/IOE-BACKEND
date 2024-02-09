@@ -1,8 +1,9 @@
-import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 //Entities
 import { Usuario } from "../../auth/entities/usuario.entity";
 import { Departamento } from "./departamento.entity";
+import { UsuarioRoles } from "src/auth/entities/usuario-roles.entity";
 
 @Entity()
 export class Role {
@@ -22,28 +23,25 @@ export class Role {
     @UpdateDateColumn()
     fecha_actualizacion:Date;
 
-    @ManyToMany(
-        () => Usuario,
-        usuario => usuario.roles,
-        {
-            eager:true,
-            onDelete:"CASCADE"
-        }
+    //Relaciones
+    @ManyToOne(
+        () => Departamento,
+        (departamento) => departamento.roles,
     )
-    @JoinTable()
-    usuarios:Usuario[];
+
+    departamento:Departamento;
+
+    @OneToMany(
+        () => UsuarioRoles,
+        (usuariosRoles) => usuariosRoles.role
+    )
+    usuarioRoles:UsuarioRoles[];
 
     @ManyToOne(
         () => Usuario,
         (usuario) => usuario.rolesCreados
     )
     creadoPorUsuario:Usuario;
-
-    @ManyToOne(
-        () => Departamento,
-        (departamento) => departamento.roles,
-    )
-    departamento:Departamento;
 
 
 };

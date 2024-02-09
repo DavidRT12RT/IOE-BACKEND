@@ -31,7 +31,8 @@ export class JwtStrategy extends PassportStrategy(Strategy){
         const user = await this.userRepository
         .createQueryBuilder("user")
         .where('user.id = :id', {id})
-        .leftJoinAndSelect('user.roles', 'roles')
+        .leftJoinAndSelect('user.usuarioRoles', 'usuarioRoles')
+        .leftJoinAndSelect('usuarioRoles.role', 'role')
         .getOne();
 
         if(!user) throw new UnauthorizedException("Token NO valido!");

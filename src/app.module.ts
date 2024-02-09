@@ -3,10 +3,9 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { CommonModule } from './common/common.module';
-import { SeedModule } from './seed/seed.module';
 import { ProductosModule } from './productos/productos.module';
 import { InventariosModule } from './inventarios/inventarios.module';
-import { DepartamentosModule } from './departamentos/departamentos.module';
+import { SeedModule } from './seed/seed.module';
 
 @Module({ 
     imports: [
@@ -21,13 +20,13 @@ import { DepartamentosModule } from './departamentos/departamentos.module';
 			autoLoadEntities:true,
 			entities:['dist/src/**/*.entity.js'],
       		synchronize: true,
-		}),
+		}
+		),
 		AuthModule,
-		CommonModule,
 		SeedModule,
+		CommonModule,
 		ProductosModule,
 		InventariosModule,
-		DepartamentosModule,
 	],
 })
 export class AppModule {

@@ -1,7 +1,9 @@
 import { Usuario } from "src/auth/entities/usuario.entity";
 import { Categoria } from "src/productos/entities/categoria.entity";
-import { BeforeInsert, Column, CreateDateColumn, Entity, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { BeforeInsert, Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { InventarioDetalle } from "./inventario-detalle.entity";
+import { Sucursal } from "src/sucursales/entities/sucursal.entity";
+import { Almacen } from "src/sucursales/entities/almacen.entity";
 
 @Entity()
 export class Inventario {
@@ -61,12 +63,19 @@ export class Inventario {
     )
     detalles:InventarioDetalle[];
 
-    // @ManyToOne(
-    //     () => Categoria,
-    //     (categoria) => categoria.inventarios,
-    //     {nullable:true}
-    // )
-    // categoria:Categoria;
+    @ManyToOne(
+        () => Sucursal,
+        sucursal => sucursal.inventarios
+    )
+    sucursal:Sucursal;
+
+    @ManyToMany(
+        () => Almacen,
+        almacen => almacen.inventarios
+    )
+    @JoinTable()
+    almacenes:Almacen[];
+
 
     @BeforeInsert()
     checkFields(){

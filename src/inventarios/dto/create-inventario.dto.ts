@@ -19,5 +19,8 @@ export class CreateInventarioDto {
     @ArrayNotEmpty({message:"La lista de productos no puede estar vacia!"})
     @ArrayMinSize(1,{message:"Debe haber al menos un producto en la lista"})
     productos?:string[];
+    
+    @IsUUID("4",{message:"La sucursal debe ser obligatoria en el inventario"})
+    sucursal:string;
 
 };

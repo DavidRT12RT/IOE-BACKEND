@@ -1,13 +1,20 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Role } from "./entities/role.entity";
-import { Repository } from "typeorm";
-import { PaginationDto } from "src/common/dtos/pagination.dto";
-import { CreateRoleDTO } from "./dto/create-role.dto";
-import { Usuario } from "src/auth/entities/usuario.entity";
-import { UsuariosService } from "src/auth/usuarios.service";
+
+//Service's
 import { DepartamentosService } from "./departamentos.service";
+
+//Helpers
 import { handleDBErrors } from "src/common/helpers/db_errors";
+
+//Entities
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { Role } from "../entities/role.entity";
+import { Usuario } from "src/auth/entities/usuario.entity";
+
+//Dto's
+import { CreateRoleDTO } from "../dto/create-role.dto";
+import { PaginationDto } from "src/common/dtos/pagination.dto";
 
 @Injectable()
 export class RolesService {
@@ -16,12 +23,10 @@ export class RolesService {
 		@InjectRepository(Role)
 		private readonly roleRepository:Repository<Role>,
 
-        private readonly userService:UsuariosService,
-
         private readonly departamentoService:DepartamentosService
     ){}
 
-	async findOneRole(id:string){
+	async findOneRoleById(id:string){
 		const role = await this.roleRepository.createQueryBuilder("role")
 		.leftJoinAndSelect("role.departamento","departamento")
 		.leftJoinAndSelect("role.usuarios","usuarios")
@@ -29,6 +34,10 @@ export class RolesService {
 		.getOne();
 
 		if(!role) throw new NotFoundException(`Role con id ${id} no encontrado!`);
+
+		return {
+			role
+		}
 	}
 
 	async findAllRoles(paginationDto:PaginationDto){
