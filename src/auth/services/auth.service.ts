@@ -1,4 +1,4 @@
-import {  Injectable,  Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {  Injectable,  InternalServerErrorException,  Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -31,20 +31,50 @@ export class AuthService {
 
 
 	async loginUser(loginUserDto:LoginUserDto){
-		const { correo,password } = loginUserDto;
+		try {
+			const { correo, password } = { correo: loginUserDto.correo.toLowerCase(), password: loginUserDto.password };
 
-		const user = await this.userRepository.findOne({
-			where:{correo}, // -> Condicion para buscar
-			select:{correo:true,password:true,id:true} // -> Atributos que quiero
-		});
+			const usuario = await this.userRepository
+			.createQueryBuilder("usuario")
+			.leftJoinAndSelect("usuario.usuarioRoles","usuarioRoles")
+			.leftJoinAndSelect("usuarioRoles.role","role")
+			.addSelect("usuario.password") //Seleccionar el campo de la tabla o entidad
+            .where("usuario.correo = :correo", { correo })
+			.getOne();
 
-		if(!user) throw new NotFoundException("Ningun usuario encontrado por ese correo")
+			if(!usuario) throw new NotFoundException("Ningun usuario encontrado por ese correo")
 
-		if(!bcrypt.compareSync(password,user.password)) throw new UnauthorizedException("Correo o password incorrectos!")
+			if(!bcrypt.compareSync(password,usuario.password)) throw new UnauthorizedException("Correo o password incorrectos!")
 
+			return {
+				...usuario,
+				token:this.generateJWT({correo:usuario.correo,id:usuario.id})
+			};
+			
+		} catch (error) {
+			console.log(error);
+			throw new InternalServerErrorException(`Error en el servidor al momento de iniciar secion!`);
+		}
+	}
+
+	async revalidateToken(
+		usuario:Usuario
+	){
+		//Generar un nuevo token y regresarselo ya que YA paso la validacion del TOKEN
+		const token = this.generateJWT({correo:usuario.correo,id:usuario.id});
 		return {
-			...user,
-			token:this.generateJWT({correo:user.correo,id:user.id})
+			message:"Token revalidado con exito!",
+			...usuario,
+			token,
+		};
+	}
+
+	async validateToken(
+		usuario:Usuario
+	){
+		//Validar el token 
+		return {
+			message:"Token valido!"
 		};
 	}
 

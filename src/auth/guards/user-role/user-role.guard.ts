@@ -9,7 +9,8 @@ export class UserRoleGuard implements CanActivate {
 
     constructor(
         private readonly reflector:Reflector //-> Nos ayuda a ver informacion de la metadata
-    ){}
+    ){
+    }
 
     canActivate(context: ExecutionContext,): boolean | Promise<boolean> | Observable<boolean> {
 
@@ -20,7 +21,6 @@ export class UserRoleGuard implements CanActivate {
 
         const req = context.switchToHttp().getRequest();
         const user = req.user as Usuario;
-        
 
         if(!user) throw new BadRequestException("Usuario no encontrado!");  
 

@@ -7,7 +7,7 @@ import { Usuario } from "../entities/usuario.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ConfigService } from "@nestjs/config";
 import { Repository } from "typeorm";
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { ConsoleLogger, Injectable, UnauthorizedException } from "@nestjs/common";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy){
@@ -18,6 +18,7 @@ export class JwtStrategy extends PassportStrategy(Strategy){
 
         configService: ConfigService
     ) {
+
         super({
             secretOrKey: configService.get('JWT_SECRET'),
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -25,6 +26,7 @@ export class JwtStrategy extends PassportStrategy(Strategy){
     }
 
     async validate(payload:JwtPayload):Promise<Usuario>{
+
         /* Cuando tengamos un user que su firma sea valida y su fecha de creacion es valida retornara el usuario*/
         const { id } = payload;
 
