@@ -1,9 +1,13 @@
 import { Usuario } from "src/auth/entities/usuario.entity";
-import { Categoria } from "src/productos/entities/categoria.entity";
 import { BeforeInsert, Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
-import { InventarioDetalle } from "./inventario-detalle.entity";
 import { Sucursal } from "src/sucursales/entities/sucursal.entity";
 import { Almacen } from "src/sucursales/entities/almacen.entity";
+import { Producto } from "src/productos/entities/producto.entity";
+
+interface DetalleInventario {
+    productoId:string;
+    almacenes:{almacenId:string;cantidad_contada:number,fecha_registro?:Date;}[];
+};
 
 @Entity()
 export class Inventario {
@@ -35,12 +39,6 @@ export class Inventario {
     @Column({default:0})
     articulos_contados:number;
 
-    // @OneToOne(
-    //     () => Categoria,
-    //     (categoria) => categoria.id
-    // )
-    // jerarquia:Categoria;
-
     @Column()
     tipo_inventario:string;
 
@@ -50,18 +48,14 @@ export class Inventario {
     @UpdateDateColumn()
     fecha_actualizacion:Date;
 
+    @Column("jsonb",{nullable:true})
+    detalles:DetalleInventario[];
+
     @ManyToOne(
         () => Usuario,
         usuario => usuario.inventarios
     )
     supervisor:Usuario;
-
-    @OneToMany(
-        () => InventarioDetalle,
-        detalle => detalle.inventario,
-        {cascade:true}
-    )
-    detalles:InventarioDetalle[];
 
     @ManyToOne(
         () => Sucursal,
@@ -75,6 +69,19 @@ export class Inventario {
     )
     @JoinTable()
     almacenes:Almacen[];
+
+    @ManyToMany(
+        () => Producto,
+        (producto) => producto.inventarios
+    )
+    @JoinTable()
+    productos:Producto[];
+
+    @OneToMany(
+        () => Usuario,
+        (usuario) => usuario.inventariosTrabajados
+    )
+    auxiliares:Usuario[];
 
 
     @BeforeInsert()

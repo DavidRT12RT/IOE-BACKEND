@@ -163,8 +163,8 @@ export class ProductosService {
 		.leftJoinAndSelect("producto.productosAlmacen","productosAlmacen")
 		.leftJoinAndSelect("productosAlmacen.almacen","almacen")
 		.leftJoinAndSelect("producto.categoria","categoria")
-		.skip(offset)
-		.limit(limit)
+		// .skip(offset)
+		// .limit(limit)
 		.getMany()
 
 		productos = productos.map(producto => { 
@@ -173,7 +173,8 @@ export class ProductosService {
 		});
 
 		return {
-			productos
+			productos,
+			total:productos.length
 		}
 
   	}

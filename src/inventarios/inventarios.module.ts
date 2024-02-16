@@ -4,7 +4,6 @@ import { InventariosController } from './inventarios.controller';
 import { ProductosModule } from 'src/productos/productos.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Inventario } from './entities/inventario.entity';
-import { InventarioDetalle } from './entities/inventario-detalle.entity';
 import { AuthModule } from 'src/auth/auth.module';
 import { SucursalModule } from 'src/sucursales/sucursales.module';
 
@@ -17,7 +16,6 @@ import { SucursalModule } from 'src/sucursales/sucursales.module';
 		AuthModule,
 		TypeOrmModule.forFeature([
 			Inventario,
-			InventarioDetalle
 		]),
 	],
 	exports:[

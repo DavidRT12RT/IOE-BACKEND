@@ -1,6 +1,5 @@
 import { Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Sucursal } from "./sucursal.entity";
-import { Producto } from "src/productos/entities/producto.entity";
 import { ProductoAlmacen } from "src/productos/entities/producto-almacen.entity";
 import { Inventario } from "src/inventarios/entities/inventario.entity";
 

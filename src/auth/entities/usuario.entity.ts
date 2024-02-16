@@ -103,6 +103,12 @@ export class Usuario{
     inventarios:Inventario;
 
     @ManyToOne(
+        () => Inventario,
+        (inventario) => inventario.auxiliares
+    )
+    inventariosTrabajados:Inventario;
+
+    @ManyToOne(
         () => Usuario,
         (usuario) => usuario.id,
         {nullable:true}

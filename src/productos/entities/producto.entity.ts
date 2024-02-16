@@ -1,8 +1,8 @@
 import { Usuario } from "src/auth/entities/usuario.entity";
-import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, Repository, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, Repository, UpdateDateColumn } from "typeorm";
 import { Categoria } from "./categoria.entity";
-import { InventarioDetalle } from "src/inventarios/entities/inventario-detalle.entity";
 import { ProductoAlmacen } from "./producto-almacen.entity";
+import { Inventario } from "src/inventarios/entities/inventario.entity";
 
 @Entity()
 export class Producto {
@@ -61,18 +61,17 @@ export class Producto {
 	)
 	productosAlmacen:ProductoAlmacen[];
 
+	@ManyToMany(
+		() => Inventario,
+		(inventario) => inventario.productos
+	)
+	inventarios:Inventario[];
+
 	@ManyToOne(
 		() => Categoria,
 		(categoria) => categoria.productos
 	)
 	categoria:Categoria;
-
-	@OneToMany(
-		() => InventarioDetalle,
-		(detalle) => detalle.producto
-	)
-	detalles:InventarioDetalle[];
-
 
 	@ManyToOne(
 		() => Producto,

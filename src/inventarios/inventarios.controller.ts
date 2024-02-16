@@ -47,15 +47,4 @@ export class InventariosController {
 		return this.inventariosService.update(id,updateInventarioDto,user);
 	}
 
-	@Put("/:inventarioId/detalle/:detalleId")
-	@Auth()
-	updateInventarioDetalle(
-		@Param("inventarioId",ParseUUIDPipe) inventarioId:string,
-		@Param("detalleId",ParseUUIDPipe) detalleId:string,
-		@Body() updateInventarioDetalleDto:UpdateInventarioDetalleDto,
-		@GetUser() user:Usuario
-	){
-		return this.inventariosService.updateInventarioDetalle(inventarioId,detalleId,updateInventarioDetalleDto,user);
-	}
-
 }

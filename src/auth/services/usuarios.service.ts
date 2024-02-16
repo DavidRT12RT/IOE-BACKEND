@@ -43,13 +43,13 @@ export class UsuariosService {
 		const query = await this.userRepository.createQueryBuilder("user")
         .leftJoinAndSelect('user.usuarioRoles', 'usuarioRoles')
         .leftJoinAndSelect('usuarioRoles.role', 'role')
-		.leftJoinAndSelect("roles.departamento","departamento")
+		.leftJoinAndSelect("role.departamento","departamento")
 		.leftJoinAndSelect("user.supervisor","supervisor")
 		.leftJoinAndSelect("user.personal","personal")
 
 		if(roles) {
 			const rolesArray = Array.isArray(roles) ? roles : [roles];
-			query.andWhere("roles.nombre IN (:...roles)",{roles:rolesArray});
+			query.andWhere("role.nombre IN (:...roles)",{roles:rolesArray});
 		}
 
 		const usuarios = await query

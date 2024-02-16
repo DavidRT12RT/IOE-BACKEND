@@ -5,6 +5,10 @@ export class CreateInventarioDto {
     @IsString({message:"El nombre de inventario tiene que ser un string"})
     @IsNotEmpty({message:"El nombre del inventario es necesario!"})
     nombre_inventario:string;
+
+    @IsString({message:"El nombre de inventario tiene que ser un string"})
+    @IsNotEmpty({message:"El nombre del inventario es necesario!"})
+    descripcion:string;
     
     @IsNotEmpty({message:"El tipo de jerarquia es necesario!"})
     tipo_inventario:string;
@@ -22,5 +26,10 @@ export class CreateInventarioDto {
     
     @IsUUID("4",{message:"La sucursal debe ser obligatoria en el inventario"})
     sucursal:string;
+
+    @IsOptional()
+    @ArrayNotEmpty({message:"La lista de auxiliares no puede estar vacia!"})
+    @ArrayMinSize(1,{message:"Debe haber al menos un auxiliar en la lista"})
+    auxiliares?:string[];
 
 };
