@@ -1,6 +1,7 @@
 import { CuentaBancaria } from "src/common/entities/cuenta-bancaria.entity";
 import { Direccion } from "src/common/entities/direccion.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { ProvedorProducto } from "./provedor-producto.entity";
 
 export enum CondicionesComerciales {
     CONTADO = "CONTADO",
@@ -89,5 +90,11 @@ export class Provedor {
         default:TipoDePersona.MORAL
     })
     tipoDePersona:TipoDePersona;
+
+    @OneToMany(
+        () => ProvedorProducto,
+        (provedorProducto) => provedorProducto.provedor
+    )
+    provedorProductos:ProvedorProducto[];
 
 };

@@ -7,7 +7,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Usuario } from 'src/auth/entities/usuario.entity';
 import { Producto } from './entities/producto.entity';
 
-import { SucursalService } from 'src/sucursales/sucursales.service';
 import { CategoriasService } from './categorias.service';
 
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
@@ -15,6 +14,10 @@ import { AlmacenesService } from 'src/sucursales/almacenes.service';
 import { handleDBErrors } from 'src/common/helpers/db_errors';
 import { ProductoAlmacen } from './entities/producto-almacen.entity';
 import { UpdateProductoDto } from './dto/update-producto.dto';
+import { ProvedoresService } from 'src/provedores/provedores.service';
+import { ProvedorProducto } from 'src/provedores/entities/provedor-producto.entity';
+import { MarcasService } from './marcas.service';
+import { SatService } from 'src/SAT/sat.service';
 
 @Injectable()
 export class ProductosService {
@@ -23,16 +26,17 @@ export class ProductosService {
 
 	constructor(
 		private readonly almacenService:AlmacenesService,
-
+		private readonly provedoresService:ProvedoresService,
+		private readonly marcaService:MarcasService,
+		@InjectRepository(ProvedorProducto)
+		private readonly provedorProductoRepository:Repository<ProvedorProducto>,
 		@InjectRepository(Producto)
 		private readonly productoRepository:Repository<Producto>,
-
 		@InjectRepository(ProductoAlmacen)
 		private readonly productoAlmacenRepository:Repository<ProductoAlmacen>,
-
 		private readonly dataSource:DataSource,
-		
-		private readonly categoriasService:CategoriasService
+		private readonly categoriasService:CategoriasService,
+		private readonly satService:SatService
 	){}
 
  	async createProducto(createProductoDto: CreateProductoDto,user:Usuario) {
@@ -43,15 +47,21 @@ export class ProductosService {
 
 		try {
 			
-			const { categoria:categoriaID,almacenes,...productoDtoData} = createProductoDto;
+			const { categoria:categoriaID,almacenes,provedores,marca:marcaID,claveSat:claveSatID,unidadMedidaSat:unidadMedidaSatID,...productoDtoData} = createProductoDto;
 
 			//Despues buscamos la categoria y comprobamos que exista
 			const { categoria } = await this.categoriasService.findOneCategoriaById(categoriaID);
+			const { marca } = await this.marcaService.findOneMarcaById(marcaID);
+			const { claveSat } = await this.satService.getClaveSatById(claveSatID);
+			const { unidadMedidaSat } = await this.satService.getOneUnidadeMedidaSatById(unidadMedidaSatID);
 
 			const producto = this.productoRepository.create({
 				...productoDtoData,
+				marca,
+				claveSat,
+				unidadMedidaSat,
 				usuarioCreador:user,
-				categoria
+				categoria,
 			});
 
 			await this.productoRepository.save(producto); // Guardar para tener ID
@@ -69,6 +79,23 @@ export class ProductosService {
 					await this.productoAlmacenRepository.save(productoAlmacen);
 				}
 			}
+
+			//Crear relacion entre producto y los provedores que vinieron
+			const provedorProductoPromises = [];
+			for(const provedorID of provedores){
+
+				const { provedor }  = await this.provedoresService.findOneById(provedorID);
+				
+				const provedorProducto = this.provedorProductoRepository.create({
+					producto,
+					provedor
+				});
+				const provedorProductoPromise = this.provedorProductoRepository.save(provedorProducto);
+				provedorProductoPromises.push(provedorProductoPromise);
+			}
+
+			await Promise.all(provedorProductoPromises);
+
 
 			await queryRunner.commitTransaction();
 			
@@ -163,6 +190,8 @@ export class ProductosService {
 		.leftJoinAndSelect("producto.productosAlmacen","productosAlmacen")
 		.leftJoinAndSelect("productosAlmacen.almacen","almacen")
 		.leftJoinAndSelect("producto.categoria","categoria")
+		.leftJoinAndSelect("producto.provedorProductos","provedorProductos")
+		.leftJoinAndSelect("provedorProductos.provedor","provedor")
 		// .skip(offset)
 		// .limit(limit)
 		.getMany()
@@ -184,7 +213,10 @@ export class ProductosService {
 	) {
 
 		const producto = await this.productoRepository.createQueryBuilder("producto")
-		.leftJoinAndSelect("producto.productosAlmacen","almacenes")
+		.leftJoinAndSelect("producto.provedorProductos","provedorProductos")
+		.leftJoinAndSelect("provedorProductos.provedor","provedor")
+		.leftJoinAndSelect("producto.productosAlmacen","productosAlmacen")
+		.leftJoinAndSelect("productosAlmacen.almacen","almacen")
 		.leftJoinAndSelect("producto.categoria","categoria")
 		.where("producto.id = :id",{id})
 		.getOne()

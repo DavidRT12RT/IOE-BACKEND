@@ -1,4 +1,4 @@
-import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 
 //Entities
@@ -102,7 +102,7 @@ export class Usuario{
     )
     inventarios:Inventario;
 
-    @ManyToOne(
+    @ManyToMany(
         () => Inventario,
         (inventario) => inventario.auxiliares
     )

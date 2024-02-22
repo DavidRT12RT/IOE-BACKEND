@@ -28,11 +28,11 @@ export class ProvedoresController {
     }
 
     @Get(":id")
-    // @Auth()
+    @Auth()
     findOne(
         @Param("id",ParseUUIDPipe) id:string
     ) {
-        return this.provedoresService.findOne(id);
+        return this.provedoresService.findOneById(id);
     }
 
 }

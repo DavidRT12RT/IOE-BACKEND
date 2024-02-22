@@ -7,6 +7,7 @@ import { ProductosModule } from './productos/productos.module';
 import { InventariosModule } from './inventarios/inventarios.module';
 import { SeedModule } from './seed/seed.module';
 import { ProvedoresModule } from './provedores/provedores.module';
+import { SatModule } from './SAT/sat.module';
 
 @Module({ 
     imports: [
@@ -29,6 +30,7 @@ import { ProvedoresModule } from './provedores/provedores.module';
 		ProductosModule,
 		InventariosModule,
 		ProvedoresModule,
+		SatModule
 	],
 })
 export class AppModule {

@@ -37,9 +37,11 @@ export class InventariosService {
     ):Promise<{inventarios:Inventario[]}>{
 
         const inventarios = await this.inventarioRepository.createQueryBuilder("inventarios")
-        .leftJoinAndSelect("inventarios.detalles","detalles")
-        .leftJoinAndSelect("detalles.producto","producto")
         .leftJoinAndSelect("inventarios.supervisor","supervisor")
+        .leftJoinAndSelect("inventarios.productos","productos")
+        .leftJoinAndSelect("productos.categoria","categoria")
+        .leftJoinAndSelect("inventarios.sucursal","sucursal")
+        .leftJoinAndSelect("sucursal.almacenes","almacenes")
         // .skip(paginationDto.offset)
         // .limit(paginationDto.limit)
         .getMany();
@@ -55,6 +57,7 @@ export class InventariosService {
     ):Promise<{inventario:Inventario}>{
 
         const inventario = await this.inventarioRepository.createQueryBuilder("inventario")
+        .leftJoinAndSelect("inventario.auxiliares","auxiliares")
         .leftJoinAndSelect("inventario.sucursal","sucursal")
         .leftJoinAndSelect("inventario.productos","productos")
         .leftJoinAndSelect("productos.categoria","categoria")
@@ -138,9 +141,12 @@ export class InventariosService {
             inventario.detalles = detalles;
 
             //Asociar auxiliares del inventario
-            const auxiliaresPromises = [];
-            createInventarioDto.auxiliares.map((auxiliarID) => auxiliaresPromises.push(this.usuariosService.findOneUserById(auxiliarID)));
-            inventario.auxiliares = await Promise.all(auxiliaresPromises);
+            const usuariosAuxiliares:Usuario[] = [];
+            for(const usuarioID of createInventarioDto.auxiliares){
+                const { usuario } = await this.usuariosService.findOneUserById(usuarioID);
+                usuariosAuxiliares.push(usuario);
+            }
+            inventario.auxiliares = usuariosAuxiliares;
             
             await this.inventarioRepository.save(inventario);
             await queryRunner.commitTransaction();
@@ -173,76 +179,44 @@ export class InventariosService {
 
             //Obtener el inventario existe
             const { inventario } = await this.findOneInventarioById(id);
+
+            //Actualizamos informacion basica
+            inventario.descripcion = updateInventarioDto.descripcion || inventario.descripcion;
+            inventario.nombre_inventario = updateInventarioDto.nombre_inventario || inventario.nombre_inventario;
             
             //Actualizamos el supervisor del inventario
             if(updateInventarioDto.supervisor){
                 const { usuario:supervisor } = await this.usuariosService.findOneUserById(updateInventarioDto.supervisor);
-                inventario.supervisor  = supervisor;
+                inventario.supervisor = supervisor; //Asignamos a el nuevo supervisor
             }
 
-            //Actualizamos propiedades generales del inventario
-            inventario.estatus = updateInventarioDto?.estatus || inventario.estatus;
-            inventario.nombre_inventario = updateInventarioDto.nombre_inventario || inventario.nombre_inventario;
+            //Actualizamos los auxiliares que vienen
+            if(updateInventarioDto.auxiliares){
+                const usuariosAuxiliares:Usuario[] = [];
+                for(const usuarioID of updateInventarioDto.auxiliares){
+                    const { usuario } = await this.usuariosService.findOneUserById(usuarioID);
+                    usuariosAuxiliares.push(usuario);
+                }
+                inventario.auxiliares = usuariosAuxiliares;
+            }
 
+            //Actualizamos los detalles del inventario
+            if(updateInventarioDto.detalles){
+                for(const detalleUpdated of updateInventarioDto.detalles){
+                    inventario.detalles = inventario.detalles.map(detalleDB => {
+                        if(detalleDB.productoId === detalleUpdated.productoId){
+                            detalleDB.almacenes = detalleUpdated.almacenes;
+                        }
+                        return detalleDB;
+                    });
+                }
+            }
 
-            //Si viene el tipo de inventario actualizamos el tipo de inventario y los productos 
-            // // if(updateInventarioDto.tipo_inventario){
+            if(updateInventarioDto.estatus){
+                inventario.estatus = updateInventarioDto.estatus;
+                inventario.articulos_contados = inventario.productos.length;
+            }
 
-            //     inventario.tipo_inventario = updateInventarioDto.tipo_inventario; 
-
-            //     let productos:Producto[] = [];
-
-            //     if(updateInventarioDto.tipo_inventario === "categoria"){
-
-            //             await this.inventarioDetalleRepository.delete({inventario});
-
-            //             //Cargar los nuevos productos de la nueva categoria 
-            //             const { productos:productosDB } = await this.productosService.findProductosByCategory(updateInventarioDto.categoria);
-            //             productos = productosDB;
-
-            //     }
-
-            //     if(updateInventarioDto.tipo_inventario === "personalizado"){
-
-            //         if(updateInventarioDto.productos.length === 0){
-            //             throw new BadRequestException(`No puedes actualizar un inventario a 0 productos!`);
-            //         }
-
-            //         const productosIds: string[] = updateInventarioDto.productos;
-
-            //         // Obtener los IDs de los productos existentes en el inventario
-            //         const productosEnInventarioIds: string[] = inventario.detalles.map((detalle) => detalle.producto.id);
-
-            //         // Filtrar los IDs de los nuevos productos para obtener solo los que no están en el inventario existente
-            //         const nuevosProductosIds: string[] = productosIds.filter(
-            //             (productoId) => !productosEnInventarioIds.includes(productoId)
-            //         );
-
-            //         // Elimina relaciones con productos que no vinieron en el request
-            //         const productosAQuitar: InventarioDetalle[] = inventario.detalles.filter(
-            //             (detalle) => !productosIds.includes(detalle.producto.id)
-            //         );
-
-            //         await Promise.all(
-            //             productosAQuitar.map(async (detalle) => {
-            //                 await this.inventarioDetalleRepository.remove(detalle);
-            //             })
-            //         );
-
-            //         // Cargar todos los productos nuevos que el usuario eligió y que no estaban en el inventario existente
-            //         for (const productoId of nuevosProductosIds) {
-            //             const { producto } = await this.productosService.findOneProductoById(productoId);
-            //             productos.push(producto);
-            //         }
-            //     }
-
-            //     //Asociar los nuevos tipos de productos
-            //     inventario.detalles = productos.map(producto => this.inventarioDetalleRepository.create({
-            //         cantidad_contada:0,
-            //         producto,
-            //     }));
-            // }
-           
             // Guardamos la nueva informacion del inventario
             await this.inventarioRepository.save(inventario);
             await queryRunner.commitTransaction();
@@ -254,6 +228,7 @@ export class InventariosService {
 
         } catch (error) {
             await queryRunner.rollbackTransaction();
+            console.log(error);
             throw new InternalServerErrorException(`Error al actualizar el inventario`);
         } finally {
             await queryRunner.release();

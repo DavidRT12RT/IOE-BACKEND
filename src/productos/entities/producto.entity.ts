@@ -1,12 +1,32 @@
 import { Usuario } from "src/auth/entities/usuario.entity";
-import { Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, Repository, UpdateDateColumn } from "typeorm";
+import { AfterInsert, AfterUpdate, Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, Repository, UpdateDateColumn } from "typeorm";
 import { Categoria } from "./categoria.entity";
 import { ProductoAlmacen } from "./producto-almacen.entity";
 import { Inventario } from "src/inventarios/entities/inventario.entity";
+import { ProvedorProducto } from "src/provedores/entities/provedor-producto.entity";
+import { Marca } from "./marca.entity";
+import { ClavesSat } from "src/SAT/entities/claves-sat.entity";
+import { UnidadMedidaSat } from "src/SAT/entities/unidad-medida-sat.entity";
+
+export enum UnidadCompra {
+	PIEZA = "PIEZA",
+	CAJA = "CAJA",
+	PAQUETE = "PAQUETE"
+};
+
+export enum UnidadVenta {
+	PIEZA = "PIEZA",
+	CAJA = "CAJA",
+	PAQUETE = "PAQUETE"
+};
+
+export enum MetodoReabasto {
+	FIJO = "FIJO",
+	RESURTIBLE = "RESURTIBLE"
+};
 
 @Entity()
 export class Producto {
-
 
 	@PrimaryGeneratedColumn("uuid")
 	id:string;
@@ -33,14 +53,44 @@ export class Producto {
 	@Column("boolean",{default:true})
 	inventariable:boolean;
 
+	@ManyToOne(
+		() => Marca,
+		(marca) => marca.productos
+	)
+	marca:Marca;
+
 	@Column("float",{default:1})
 	stock:number;
 
 	@Column("float")
 	stock_minimo:number;
 
+	@Column("float",{nullable:true,default:1})
+	dias_reabasto:number;
+
 	@Column("float")
 	costo_promedio:number;
+
+	@Column({
+		type:"enum",
+		enum:UnidadCompra,
+		default:UnidadCompra.PIEZA
+	})
+	unidad_compra:UnidadCompra;
+
+	@Column({
+		type:"enum",
+		enum:UnidadVenta,
+		default:UnidadVenta.PIEZA
+	})
+	unidad_venta:UnidadVenta;
+
+	@Column({
+		type:"enum",
+		enum:MetodoReabasto,
+		default:MetodoReabasto.FIJO
+	})
+	metodo_reabasto:MetodoReabasto;
 
     @CreateDateColumn()
     fecha_registro:Date;
@@ -88,11 +138,56 @@ export class Producto {
 	)
 	modelos_secundarios?:Producto[];
 
+	@OneToMany(
+		() => ProvedorProducto,
+		(provedorProducto) => provedorProducto.producto
+	)
+	provedorProductos:ProvedorProducto[];
+
+	@Column({
+		type:"jsonb",
+		nullable:true,
+		default:() => "'{}'"
+
+	})
+	detalles:Record<string,any>;
+
+	//SAT
+	@ManyToOne(
+		() => ClavesSat,
+		(clavesSat) => clavesSat.productos
+	)
+	claveSat:ClavesSat;
+
+	@ManyToOne(
+		() => UnidadMedidaSat,
+		(unidadMedidaSat) => unidadMedidaSat.productos
+	)
+	unidadMedidaSat:UnidadMedidaSat;
+
 	// Método para calcular el stock total
   	getStockTotal(): number {
 		console.log("Entramos a calcular esto");
       	// return this.productosAlmacen.reduce((total, productoAlmacen) => total + productoAlmacen.stock,0);
 		return 20;
   	}
+
+	calcularCostoPromedio():number {
+		let costoTotal = 0;
+		for(const provedorProducto of this.provedorProductos){
+			costoTotal += provedorProducto.costo;
+		}
+		return (costoTotal / this.provedorProductos.length);
+	}
+
+	@AfterInsert()
+	cleanData(){
+		this.costo_promedio = this.calcularCostoPromedio();
+	}
+
+	@AfterUpdate()
+	updateData(){
+		this.costo_promedio = this.calcularCostoPromedio();
+	}
 
 }

@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateProvedorDto } from './dto/create-provedor.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Provedor } from './entities/provedor.entity';
@@ -90,6 +90,11 @@ export class ProvedoresService {
         const provedores = await this.provedorRepository.createQueryBuilder("provedores")
         .leftJoinAndSelect("provedores.direcciones","direcciones")
         .leftJoinAndSelect("provedores.cuentasBancarias","cuentasBancarias")
+        .leftJoinAndSelect("provedores.provedorProductos","provedorProductos")
+        .leftJoinAndSelect("provedorProductos.producto","producto")
+        .leftJoinAndSelect("producto.categoria","categoria")
+		.leftJoinAndSelect("producto.productosAlmacen","productosAlmacen")
+		.leftJoinAndSelect("productosAlmacen.almacen","almacen")
         .getMany();
 
 
@@ -99,13 +104,20 @@ export class ProvedoresService {
 
     }
 
-    async findOne(id:string){
+    async findOneById(id:string){
 
         const provedor = await this.provedorRepository.createQueryBuilder("provedor")
         .leftJoinAndSelect("provedor.direcciones","direcciones")
         .leftJoinAndSelect("provedor.cuentasBancarias","cuentasBancarias")
+        .leftJoinAndSelect("provedor.provedorProductos","provedorProductos")
+        .leftJoinAndSelect("provedorProductos.producto","producto")
+        .leftJoinAndSelect("producto.categoria","categoria")
+		.leftJoinAndSelect("producto.productosAlmacen","productosAlmacen")
+		.leftJoinAndSelect("productosAlmacen.almacen","almacen")
 		.where("provedor.id = :id",{id})
         .getOne();
+
+        if(!provedor) throw new NotFoundException(`Ningun provedor encontrado por el id ${id}`);
 
         return {
             provedor

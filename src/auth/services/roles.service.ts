@@ -29,7 +29,6 @@ export class RolesService {
 	async findOneRoleById(id:string){
 		const role = await this.roleRepository.createQueryBuilder("role")
 		.leftJoinAndSelect("role.departamento","departamento")
-		.leftJoinAndSelect("role.usuarios","usuarios")
 		.leftJoinAndSelect("role.creadoPorUsuario","usuario")
 		.getOne();
 

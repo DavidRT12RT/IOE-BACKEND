@@ -116,6 +116,7 @@ export class UsuariosService {
 			};
 			
 		} catch (error) {
+			console.log(error);
 			await queryRunner.rollbackTransaction();
 			throw new BadRequestException(`${error}`);
 		} finally {

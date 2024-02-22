@@ -77,12 +77,12 @@ export class Inventario {
     @JoinTable()
     productos:Producto[];
 
-    @OneToMany(
+    @ManyToMany(
         () => Usuario,
         (usuario) => usuario.inventariosTrabajados
     )
+    @JoinTable()
     auxiliares:Usuario[];
-
 
     @BeforeInsert()
     checkFields(){
