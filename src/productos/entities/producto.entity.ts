@@ -1,5 +1,5 @@
 import { Usuario } from "src/auth/entities/usuario.entity";
-import { AfterInsert, AfterUpdate, Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, Repository, UpdateDateColumn } from "typeorm";
+import { AfterInsert, AfterUpdate, BeforeInsert, Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, Repository, UpdateDateColumn } from "typeorm";
 import { Categoria } from "./categoria.entity";
 import { ProductoAlmacen } from "./producto-almacen.entity";
 import { Inventario } from "src/inventarios/entities/inventario.entity";
@@ -25,17 +25,31 @@ export enum MetodoReabasto {
 	RESURTIBLE = "RESURTIBLE"
 };
 
+export enum Estatus {
+	ACTIVO = "ACTIVO",
+	"NO ACTIVO" = "NO ACTIVO"
+};
+
 @Entity()
 export class Producto {
 
 	@PrimaryGeneratedColumn("uuid")
 	id:string;
 
+	@Column({nullable:true})
+	SKU:string;
+
 	@Column()
 	nombre:string;
 
 	@Column()
 	descripcion:string;
+
+	@Column({
+		enum:Estatus,
+		default:Estatus.ACTIVO
+	})
+	estatus:Estatus;
 
 	@Column("text",{
 		array:true,
@@ -53,13 +67,13 @@ export class Producto {
 	@Column("boolean",{default:true})
 	inventariable:boolean;
 
-	@ManyToOne(
-		() => Marca,
-		(marca) => marca.productos
-	)
-	marca:Marca;
+	// @ManyToOne(
+	// 	() => Marca,
+	// 	(marca) => marca.productos
+	// )
+	// marca:Marca;
 
-	@Column("float",{default:1})
+	@Column("float",{default:0})
 	stock:number;
 
 	@Column("float")
@@ -68,7 +82,7 @@ export class Producto {
 	@Column("float",{nullable:true,default:1})
 	dias_reabasto:number;
 
-	@Column("float")
+	@Column("float",{nullable:true})
 	costo_promedio:number;
 
 	@Column({
@@ -179,15 +193,4 @@ export class Producto {
 		}
 		return (costoTotal / this.provedorProductos.length);
 	}
-
-	@AfterInsert()
-	cleanData(){
-		this.costo_promedio = this.calcularCostoPromedio();
-	}
-
-	@AfterUpdate()
-	updateData(){
-		this.costo_promedio = this.calcularCostoPromedio();
-	}
-
 }

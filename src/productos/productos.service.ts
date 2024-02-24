@@ -47,58 +47,60 @@ export class ProductosService {
 
 		try {
 			
-			const { categoria:categoriaID,almacenes,provedores,marca:marcaID,claveSat:claveSatID,unidadMedidaSat:unidadMedidaSatID,...productoDtoData} = createProductoDto;
+			const { categoria:categoriaID,almacenes,provedores,claveSat:claveSatID,unidadMedidaSat:unidadMedidaSatID,...productoDtoData} = createProductoDto;
 
 			//Despues buscamos la categoria y comprobamos que exista
 			const { categoria } = await this.categoriasService.findOneCategoriaById(categoriaID);
-			const { marca } = await this.marcaService.findOneMarcaById(marcaID);
 			const { claveSat } = await this.satService.getClaveSatById(claveSatID);
 			const { unidadMedidaSat } = await this.satService.getOneUnidadeMedidaSatById(unidadMedidaSatID);
 
+
 			const producto = this.productoRepository.create({
 				...productoDtoData,
-				marca,
 				claveSat,
 				unidadMedidaSat,
 				usuarioCreador:user,
 				categoria,
 			});
 
+
 			await this.productoRepository.save(producto); // Guardar para tener ID
 
-			if(almacenes.length >= 1){
-				//Insertar el producto en cada uno de los almacenes
-				for(const almacenInfo of almacenes){
-					const { almacen:almacenId,stock } = almacenInfo;
-					const { almacen } = await this.almacenService.findOneAlmacenById(almacenId);
-					const productoAlmacen = this.productoAlmacenRepository.create({
-						producto,
-						almacen,
-						stock
-					});
-					await this.productoAlmacenRepository.save(productoAlmacen);
-				}
+			//Generamos SKU si no viene en la peticion
+			if(producto.SKU === "") producto.SKU = producto.id.toString().substr(0, 10);
+
+			//Crear relacion entre producto y almacenes que vinieron
+			const almacenProductoPromises = [];
+			for(const almacenInfo of almacenes){
+				const { almacen:almacenId,stock } = almacenInfo;
+				const { almacen } = await this.almacenService.findOneAlmacenById(almacenId);
+				const productoAlmacen = this.productoAlmacenRepository.create({
+					producto,
+					almacen,
+					stock
+				});
+				const almacenProductoPromise = this.productoAlmacenRepository.save(productoAlmacen);
+				almacenProductoPromises.push(almacenProductoPromise);
 			}
 
 			//Crear relacion entre producto y los provedores que vinieron
 			const provedorProductoPromises = [];
-			for(const provedorID of provedores){
-
-				const { provedor }  = await this.provedoresService.findOneById(provedorID);
-				
+			for(const provedorInfo of provedores){
+				const { provedor:provedorId,costo } = provedorInfo;
+				const { provedor }  = await this.provedoresService.findOneById(provedorId);
 				const provedorProducto = this.provedorProductoRepository.create({
 					producto,
-					provedor
+					provedor,
+					costo
 				});
 				const provedorProductoPromise = this.provedorProductoRepository.save(provedorProducto);
 				provedorProductoPromises.push(provedorProductoPromise);
 			}
 
-			await Promise.all(provedorProductoPromises);
-
-
-			await queryRunner.commitTransaction();
+			await Promise.all([...almacenProductoPromises,...provedorProductoPromises]);
 			
+			await this.productoRepository.save(producto); 
+			await queryRunner.commitTransaction();
 			return {
 				producto,
 				message:"Producto creado con exito!"
@@ -130,7 +132,7 @@ export class ProductosService {
 			const { almacenes,categoria,...toUpdate } = updateProductoDto;
 
 			producto.nombre = toUpdate.nombre || producto.nombre;
-			producto.costo_promedio = toUpdate.costo_promedio || producto.costo_promedio;
+			// producto.costo_promedio = toUpdate.costo_promedio || producto.costo_promedio;
 			producto.material = toUpdate.material || producto.material;
 			producto.descripcion = toUpdate.descripcion || producto.descripcion;
 			producto.stock_minimo = toUpdate.stock_minimo || producto.stock_minimo;
@@ -187,6 +189,8 @@ export class ProductosService {
 		const { limit = 10, offset = 0 } = paginationDto;
 
 		let productos = await this.productoRepository.createQueryBuilder("producto")
+		.leftJoinAndSelect("producto.claveSat","claveSat")
+		.leftJoinAndSelect("producto.unidadMedidaSat","unidadMedidaSat")
 		.leftJoinAndSelect("producto.productosAlmacen","productosAlmacen")
 		.leftJoinAndSelect("productosAlmacen.almacen","almacen")
 		.leftJoinAndSelect("producto.categoria","categoria")
@@ -213,6 +217,8 @@ export class ProductosService {
 	) {
 
 		const producto = await this.productoRepository.createQueryBuilder("producto")
+		.leftJoinAndSelect("producto.claveSat","claveSat")
+		.leftJoinAndSelect("producto.unidadMedidaSat","unidadMedidaSat")
 		.leftJoinAndSelect("producto.provedorProductos","provedorProductos")
 		.leftJoinAndSelect("provedorProductos.provedor","provedor")
 		.leftJoinAndSelect("producto.productosAlmacen","productosAlmacen")

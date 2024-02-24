@@ -1,3 +1,4 @@
+import { Transform } from "class-transformer";
 import { IsNumber, IsOptional, IsUUID } from "class-validator";
 
 export class CreateProductoAlmacenDto{
@@ -6,6 +7,7 @@ export class CreateProductoAlmacenDto{
     almacen:string;
 
     @IsNumber()
+	@Transform(({value}) => parseInt(value))
     stock:number;
 
     @IsOptional()

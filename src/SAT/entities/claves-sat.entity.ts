@@ -9,12 +9,9 @@ export class ClavesSat {
 
     @Column()
     clave:string;
-    
-    @Column()
-    tipo:string;
 
     @Column()
-    nombre:string;
+    descripcion:string;
 
     @OneToMany(
         () => Producto,

@@ -11,6 +11,8 @@ import { RolesService } from 'src/auth/services/roles.service';
 import { Departamento } from 'src/auth/entities/departamento.entity';
 import { AuthService } from 'src/auth/services/auth.service';
 import { UsuarioRoles } from 'src/auth/entities/usuario-roles.entity';
+import { ClavesSat } from 'src/SAT/entities/claves-sat.entity';
+import { UnidadMedidaSat } from 'src/SAT/entities/unidad-medida-sat.entity';
 
 @Injectable()
 export class SeedService {
@@ -31,7 +33,13 @@ export class SeedService {
 		private readonly departmentRepository:Repository<Departamento>,
 
 		@InjectRepository(UsuarioRoles)
-		private readonly usuarioRolesRepository:Repository<UsuarioRoles>
+		private readonly usuarioRolesRepository:Repository<UsuarioRoles>,
+
+		@InjectRepository(ClavesSat)
+		private readonly claveSatRepository:Repository<ClavesSat>,
+
+		@InjectRepository(UnidadMedidaSat)
+		private readonly unidaMedidaSatRepository:Repository<UnidadMedidaSat>
 
 	){}
 
@@ -58,6 +66,9 @@ export class SeedService {
 		});
 		role = await this.usuarioRolesRepository.save(role);
 
+		await this.insertAllClavesSat();
+		await this.insertUnidadesMedidaSat();
+
 		await this.userRepository.save(systemUser);
 
 		return {
@@ -65,6 +76,22 @@ export class SeedService {
 		};
 
 	}	
+
+	async insertAllClavesSat(){
+		const claveSatPromises = initialData.clavesSat.map(claveSat => {
+			let claveSatDB = this.claveSatRepository.create(claveSat);
+			return this.claveSatRepository.save(claveSatDB);
+		});
+		await Promise.all(claveSatPromises);
+	}
+
+	async insertUnidadesMedidaSat(){
+		const unidadesMedidaPromises = initialData.unidadesMedidaSat.map(unidadMedidaSat => {
+			let unidadMedidaDB = this.unidaMedidaSatRepository.create(unidadMedidaSat);
+			return this.unidaMedidaSatRepository.save(unidadMedidaDB);
+		});
+		await Promise.all(unidadesMedidaPromises);
+	}
 
 
 	private async deleteTables(){

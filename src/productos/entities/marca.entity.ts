@@ -10,10 +10,10 @@ export class Marca {
     @Column()
     nombre:string;
 
-    @OneToMany(
-        () => Producto,
-        (producto) => producto.marca
-    )
-    productos:Producto[];
+    // @OneToMany(
+    //     () => Producto,
+    //     (producto) => producto.marca
+    // )
+    // productos:Producto[];
 
 };

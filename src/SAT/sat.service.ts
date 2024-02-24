@@ -26,7 +26,7 @@ export class SatService{
 
     async getClaveSatById(id:string){
         const claveSat = await this.clavesSatRepository.createQueryBuilder("claveSat")
-        .where("claveSat.id := id",{id})
+        .where("claveSat.id = :id",{id})
         .getOne();
 
         if(!claveSat) throw new NotFoundException(`Ninguna clave SAT encontrada por el id ${id}`);
@@ -47,8 +47,8 @@ export class SatService{
 
     async getOneUnidadeMedidaSatById(id:string){
 
-        const unidadMedidaSat = await this.unidadMedidaSatRepository.createQueryBuilder("unidaMedidaSat")
-        .where("unidadMedidaSat.id := id",{id})
+        const unidadMedidaSat = await this.unidadMedidaSatRepository.createQueryBuilder("unidadMedidaSat")
+        .where("unidadMedidaSat.id = :id",{id})
         .getOne();
 
         if(!unidadMedidaSat) throw new NotFoundException(`Ninguna unida de medida del sat por el id ${id}`);

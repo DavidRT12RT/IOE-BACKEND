@@ -6,7 +6,7 @@ import { MetodoReabasto, UnidadCompra, UnidadVenta } from "../entities/producto.
 class Provedor {
 
 	@IsUUID("4",{message:"El id del provedor tiene que ser un uuid valido!"})
-	id:string;
+	provedor:string;
 	
 	@IsInt()
 	@Min(0)
@@ -16,6 +16,10 @@ class Provedor {
 };
 
 export class CreateProductoDto {
+
+	@IsOptional()
+	@IsString()
+	SKU:string;	
 
 	@IsString({message:"El nombre del producto debe ser un string"})
 	nombre:string;
@@ -28,10 +32,11 @@ export class CreateProductoDto {
 	@Transform(({value}) => parseInt(value))
 	stock_minimo:number;
 
-	@IsInt()
-	@Min(1)
-	@Transform(({value}) => parseInt(value))
-	costo_promedio:number;
+	// @IsOptional()
+	// @IsInt()
+	// @Min(1)
+	// @Transform(({value}) => parseInt(value))
+	// costo_promedio:number;
 
     @IsUUID("4",{message:"La categoria debe ser un UUID valido!"})
     categoria:string;
@@ -46,11 +51,17 @@ export class CreateProductoDto {
     @IsUUID("4",{message:"La marca del producto debe ser un UUID valido!"})
 	marca:string;
 
+	@IsOptional()
 	@IsArray({message:"Los provedores deben ser un array de provedores"})
-	@ArrayNotEmpty({message:"Los provedores deben ser almenos 1"})
 	@Type(() => Provedor)
 	@ValidateNested({each:true})
 	provedores:Provedor[];
+
+	@IsOptional()
+	@IsArray()
+	@ValidateNested({each:true})
+	@Type(() => CreateProductoAlmacenDto)
+	almacenes:CreateProductoAlmacenDto[];
 
 	@IsOptional()
 	@IsString()
@@ -64,11 +75,6 @@ export class CreateProductoDto {
 	@IsBoolean()
 	inventariable:boolean;
 
-	@IsArray()
-	@ArrayNotEmpty()
-	@ValidateNested({each:true})
-	@Type(() => CreateProductoAlmacenDto)
-	almacenes:CreateProductoAlmacenDto[];
 
 	@IsEnum(UnidadCompra,{message:"La unida de compra no es valida!"})
 	unidad_compra:UnidadCompra;
@@ -87,5 +93,20 @@ export class CreateProductoDto {
 	@IsNumber()
 	dias_reabasto:number;
 
+	@IsOptional()
+	@IsBoolean()
+	es_producto_padre:boolean;
+
+	@IsOptional()
+	@IsBoolean()
+	es_producto_hijo:boolean;
+
+	@IsOptional()
+	@IsUUID("4",{message:"El id del poroducto padre debe ser un id valido!"})
+	producto_padre:string;
+
+	@IsOptional()
+	@IsNumber()
+	numero_productos_hijos:number;
 };
 
