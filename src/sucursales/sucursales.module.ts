@@ -12,6 +12,9 @@ import { SucursalController } from './sucursales.controller';
 
 import { SucursalService } from './sucursales.service';
 import { AlmacenesService } from './almacenes.service';
+import { Destinatario } from 'src/common/entities/destinatario.entity';
+import { CommonModule } from 'src/common/common.module';
+import { SalidasModule } from 'src/salidas/salidas.module';
 
 
 @Module({
@@ -25,9 +28,11 @@ import { AlmacenesService } from './almacenes.service';
 	],
 	imports:[
 		AuthModule,
+		CommonModule,
+		SalidasModule,
 		TypeOrmModule.forFeature([
 			Sucursal,
-			Almacen
+			Almacen,
 		]),
 	],
 	exports:[
@@ -36,4 +41,4 @@ import { AlmacenesService } from './almacenes.service';
 		TypeOrmModule
 	]
 })
-export class SucursalModule {}
+export class SucursalesModule {}

@@ -3,8 +3,12 @@ import { Sucursal } from "./sucursal.entity";
 import { ProductoAlmacen } from "src/productos/entities/producto-almacen.entity";
 import { Inventario } from "src/inventarios/entities/inventario.entity";
 
+
+import { Destinatario } from "src/common/entities/destinatario.entity";
+import { Salida } from "src/salidas/entities/salida.entity";
+
 @Entity()
-export class Almacen{
+export class Almacen extends Destinatario{
     
     @PrimaryGeneratedColumn("uuid")
     id:string;
@@ -42,5 +46,11 @@ export class Almacen{
         (productoAlmacen) => productoAlmacen.almacen
     )
 	productosAlmacen:ProductoAlmacen[];
+
+    @OneToMany(
+        () => Salida,
+        (salida) => salida.destinatario
+    )
+    salidas:Salida[];
 
 };

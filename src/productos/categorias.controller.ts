@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Put, Query } from "@nestjs/common";
 
 //Decorator's
 import { Auth, GetUser } from "src/auth/decorators";
@@ -12,6 +12,7 @@ import { CreateCategoriaDto } from "./dto/create-categoria.dto";
 
 //Service's
 import { CategoriasService } from "./categorias.service";
+import { UpdateCategoriaDto } from "./dto/update-categoria.dto";
 
 @Controller("categorias")
 export class CategoriasController{
@@ -29,6 +30,14 @@ export class CategoriasController{
 		return this.categoriasService.findAllCategorias(paginationDto);
 	}
 
+	@Get("/:id")
+	@Auth()
+	findOneCategoriaById(
+		@Param("id",ParseUUIDPipe) id:string,
+	){
+		return this.categoriasService.findOneCategoriaById(id);
+	}
+
 	@Post()
 	@Auth()
 	createCategoria(
@@ -37,6 +46,16 @@ export class CategoriasController{
 	){
 
 		return this.categoriasService.createCategoria(createCategoriaDto,user);
+	}
+
+	@Put("/:id")
+	@Auth()
+	updateCategoria(
+		@Param("id",ParseUUIDPipe) id:string,
+		@Body() updateCategoriaDto:UpdateCategoriaDto,
+		@GetUser() user:Usuario
+	){
+		return this.categoriasService.updateCategoria(id,updateCategoriaDto,user);
 	}
 
 

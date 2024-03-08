@@ -1,9 +1,7 @@
-import { IsString } from "class-validator";
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 import { Producto } from "./producto.entity";
 import { Usuario } from "src/auth/entities/usuario.entity";
-import { Inventario } from "src/inventarios/entities/inventario.entity";
 
 @Entity()
 export class Categoria{
@@ -30,13 +28,6 @@ export class Categoria{
     )
     productos:Producto[];
 
-    // @OneToMany(
-    //     () => Inventario,
-    //     (inventario) => inventario.categoria,
-    //     {nullable:true}
-    // )
-    // inventarios:Inventario[];
-
 	@ManyToOne(
 		() => Usuario,
 		(usuario) => usuario.categoriasCreadas
@@ -45,7 +36,7 @@ export class Categoria{
 
     @ManyToOne(
         () => Categoria,
-        categoria => categoria.categoria_hija,
+        categoria => categoria.categorias_hija,
         {nullable:true}
     )
     categoria_padre?:Categoria;
@@ -55,7 +46,7 @@ export class Categoria{
         (categoria) => categoria.categoria_padre,
         {nullable:true}
     )
-    categoria_hija?:Categoria;
+    categorias_hija?:Categoria;
 
 
 };

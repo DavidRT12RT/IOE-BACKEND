@@ -2,6 +2,8 @@ import { CuentaBancaria } from "src/common/entities/cuenta-bancaria.entity";
 import { Direccion } from "src/common/entities/direccion.entity";
 import { Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { ProvedorProducto } from "./provedor-producto.entity";
+import { Destinatario } from "src/common/entities/destinatario.entity";
+import { Salida } from "src/salidas/entities/salida.entity";
 
 export enum CondicionesComerciales {
     CONTADO = "CONTADO",
@@ -24,7 +26,7 @@ export enum CondicionesPago {
 };
 
 @Entity()
-export class Provedor {
+export class Provedor extends Destinatario{
 
     @PrimaryGeneratedColumn("uuid")
     id:string;
@@ -96,5 +98,11 @@ export class Provedor {
         (provedorProducto) => provedorProducto.provedor
     )
     provedorProductos:ProvedorProducto[];
+
+    @OneToMany(
+        () => Salida,
+        salida => salida.destinatario
+    )
+    salidas:Salida[];
 
 };

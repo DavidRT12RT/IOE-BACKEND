@@ -6,6 +6,7 @@ import { CreateAlmacenDto } from "./dto/create-almacen.dto";
 import { Usuario } from "src/auth/entities/usuario.entity";
 import { PaginationDto } from "src/common/dtos/pagination.dto";
 import { SucursalService } from "./sucursales.service";
+import { Destinatario } from "src/common/entities/destinatario.entity";
 
 @Injectable()
 export class AlmacenesService {
@@ -15,6 +16,9 @@ export class AlmacenesService {
 		private readonly almacenRepository:Repository<Almacen>,
 
         private readonly sucursalService:SucursalService,
+
+		@InjectRepository(Destinatario)
+		private readonly destinatarioRepository:Repository<Destinatario>
 
     ){}
 

@@ -11,8 +11,8 @@ export class CreateProvedorDto {
     @IsString({message:"El nombre del provedor debe ser un string"})
     nombre:string;
 
-    @IsNotEmpty({message:"El nombre del provedor debe venir en la peticion"})
-    @IsString({message:"El nombre del provedor debe ser un string"})
+    @IsNotEmpty({message:"El alias del provedor debe venir en la peticion"})
+    @IsString({message:"El alias del provedor debe ser un string"})
     alias:string;
 
     @IsNotEmpty({message:"El RFC debe venir en la peticion"})

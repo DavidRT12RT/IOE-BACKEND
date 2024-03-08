@@ -56,7 +56,7 @@ import { RolesService } from './services/roles.service';
 			useFactory:(configService:ConfigService) => ({
 				secret:configService.get("JWT_SECRET"),
 				signOptions:{
-					expiresIn:"2 days"
+					expiresIn:"5 days"
 				}
 			})
 		})

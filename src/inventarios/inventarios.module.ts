@@ -5,13 +5,13 @@ import { ProductosModule } from 'src/productos/productos.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Inventario } from './entities/inventario.entity';
 import { AuthModule } from 'src/auth/auth.module';
-import { SucursalModule } from 'src/sucursales/sucursales.module';
+import { SucursalesModule } from 'src/sucursales/sucursales.module';
 
 @Module({
 	controllers: [InventariosController],
   	providers: [InventariosService],
 	imports:[
-		SucursalModule,
+		SucursalesModule,
 		ProductosModule,
 		AuthModule,
 		TypeOrmModule.forFeature([

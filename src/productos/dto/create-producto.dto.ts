@@ -38,6 +38,7 @@ export class CreateProductoDto {
 	// @Transform(({value}) => parseInt(value))
 	// costo_promedio:number;
 
+	@IsOptional()
     @IsUUID("4",{message:"La categoria debe ser un UUID valido!"})
     categoria:string;
 

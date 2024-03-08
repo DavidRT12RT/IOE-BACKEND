@@ -4,7 +4,7 @@ import { ProductosService } from './productos.service';
 import { ProductosController } from './productos.controller';
 
 import { AuthModule } from 'src/auth/auth.module';
-import { SucursalModule } from 'src/sucursales/sucursales.module';
+import { SucursalesModule } from 'src/sucursales/sucursales.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Producto } from './entities/producto.entity';
 import { Categoria } from './entities/categoria.entity';
@@ -16,18 +16,21 @@ import { MarcasController } from './marcas.controller';
 import { Marca } from './entities/marca.entity';
 import { MarcasService } from './marcas.service';
 import { SatModule } from 'src/SAT/sat.module';
+import { Salida } from 'src/salidas/entities/salida.entity';
+import { SalidasModule } from 'src/salidas/salidas.module';
 
 @Module({
 	imports:[
 		ProvedoresModule,
 		AuthModule,
-		SucursalModule,
+		SucursalesModule,
 		SatModule,
+		SalidasModule,
 		TypeOrmModule.forFeature([
 			ProductoAlmacen,
 			Producto,
 			Categoria,
-			Marca
+			Marca,
 		]),
 	],
   	controllers: [

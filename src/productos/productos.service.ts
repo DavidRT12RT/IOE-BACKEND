@@ -27,7 +27,6 @@ export class ProductosService {
 	constructor(
 		private readonly almacenService:AlmacenesService,
 		private readonly provedoresService:ProvedoresService,
-		private readonly marcaService:MarcasService,
 		@InjectRepository(ProvedorProducto)
 		private readonly provedorProductoRepository:Repository<ProvedorProducto>,
 		@InjectRepository(Producto)
@@ -189,6 +188,8 @@ export class ProductosService {
 		const { limit = 10, offset = 0 } = paginationDto;
 
 		let productos = await this.productoRepository.createQueryBuilder("producto")
+		.leftJoinAndSelect("producto.salidas","salida")
+		.leftJoinAndSelect("producto.inventarios","inventario")
 		.leftJoinAndSelect("producto.claveSat","claveSat")
 		.leftJoinAndSelect("producto.unidadMedidaSat","unidadMedidaSat")
 		.leftJoinAndSelect("producto.productosAlmacen","productosAlmacen")
@@ -217,6 +218,7 @@ export class ProductosService {
 	) {
 
 		const producto = await this.productoRepository.createQueryBuilder("producto")
+		.leftJoinAndSelect("producto.salidas","salida")
 		.leftJoinAndSelect("producto.claveSat","claveSat")
 		.leftJoinAndSelect("producto.unidadMedidaSat","unidadMedidaSat")
 		.leftJoinAndSelect("producto.provedorProductos","provedorProductos")

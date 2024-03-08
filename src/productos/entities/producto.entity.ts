@@ -1,12 +1,12 @@
 import { Usuario } from "src/auth/entities/usuario.entity";
-import { AfterInsert, AfterUpdate, BeforeInsert, Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, Repository, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, Repository, UpdateDateColumn } from "typeorm";
 import { Categoria } from "./categoria.entity";
 import { ProductoAlmacen } from "./producto-almacen.entity";
 import { Inventario } from "src/inventarios/entities/inventario.entity";
 import { ProvedorProducto } from "src/provedores/entities/provedor-producto.entity";
-import { Marca } from "./marca.entity";
 import { ClavesSat } from "src/SAT/entities/claves-sat.entity";
 import { UnidadMedidaSat } from "src/SAT/entities/unidad-medida-sat.entity";
+import { Salida } from "src/salidas/entities/salida.entity";
 
 export enum UnidadCompra {
 	PIEZA = "PIEZA",
@@ -131,9 +131,18 @@ export class Producto {
 	)
 	inventarios:Inventario[];
 
+	@ManyToMany(
+		() => Salida,
+		(salida) => salida.productos
+	)
+	salidas:Salida[];
+
 	@ManyToOne(
 		() => Categoria,
-		(categoria) => categoria.productos
+		(categoria) => categoria.productos,
+		{
+			nullable:true
+		}
 	)
 	categoria:Categoria;
 
